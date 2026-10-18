@@ -13,6 +13,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { WalletProvider, useWallet } from "@/lib/useWallet";
 import ToastProvider from "@/lib/ToastContext";
 import ServiceWorkerUpdateToast from "@/components/ServiceWorkerUpdateToast";
+import { useTranslation } from "@/contexts/I18nContext";
 
 const AIPaymentAssistant = dynamic(() => import("@/components/AIPaymentAssistant"), {
   ssr: false,
@@ -35,6 +36,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 function InstallBanner() {
+  const { t } = useTranslation();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
@@ -70,16 +72,16 @@ function InstallBanner() {
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
             <h3 className="mb-1 text-sm font-display font-semibold text-white">
-              Install MicroPay
+              {t("app.installTitle")}
             </h3>
             <p className="text-xs text-slate-400">
-              Add to your home screen for quick access and offline support
+              {t("app.installBody")}
             </p>
           </div>
           <button
             onClick={() => setShowBanner(false)}
             className="cursor-pointer p-1 text-slate-500 transition-colors hover:text-slate-300"
-            aria-label="Dismiss"
+            aria-label={t("app.dismissAria")}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -93,13 +95,13 @@ function InstallBanner() {
         </div>
         <div className="mt-3 flex gap-2">
           <button onClick={handleInstall} className="btn-primary flex-1 px-4 py-2 text-xs">
-            Install App
+            {t("app.installApp")}
           </button>
           <button
             onClick={() => setShowBanner(false)}
             className="btn-secondary flex-1 px-4 py-2 text-xs"
           >
-            Not Now
+            {t("app.notNow")}
           </button>
         </div>
       </div>
@@ -135,6 +137,7 @@ function AppShell({
   setIsQuickSendOpen: (isOpen: boolean) => void;
 }) {
   const { publicKey } = useWallet();
+  const { t } = useTranslation();
   const router = useRouter();
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
@@ -178,7 +181,7 @@ function AppShell({
   return (
     <>
       {isOffline && (
-        <div role="alert" className="w-full bg-amber-500/15 px-4 py-2 text-center text-sm text-amber-200">You&apos;re offline — data may not be up to date.</div>
+        <div role="alert" className="w-full bg-amber-500/15 px-4 py-2 text-center text-sm text-amber-200">{t("app.offlineBanner")}</div>
       )}
       <div className="min-h-screen bg-white bg-grid transition-colors duration-300 dark:bg-cosmos-900">
         <Navbar onOpenAssistant={() => setIsAssistantOpen(true)} />

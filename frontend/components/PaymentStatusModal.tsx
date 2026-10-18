@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { formatAssetPrecise, formatDateFull } from "@/utils/intlFormatters";
+import { useTranslation } from "@/contexts/I18nContext";
 
 export type PaymentStepId = "building" | "signing" | "submitting" | "confirming";
 export type PaymentFlowStatus =
@@ -50,11 +51,11 @@ interface PaymentStatusModalProps {
   receipt?: PaymentReceiptDetails | null;
 }
 
-const STEP_ORDER: Array<{ id: PaymentStepId; label: string }> = [
-  { id: "building", label: "Building" },
-  { id: "signing", label: "Signing" },
-  { id: "submitting", label: "Submitting" },
-  { id: "confirming", label: "Confirming" },
+const STEP_ORDER: Array<{ id: PaymentStepId; labelKey: string }> = [
+  { id: "building", labelKey: "paymentStatus.steps.building" },
+  { id: "signing", labelKey: "paymentStatus.steps.signing" },
+  { id: "submitting", labelKey: "paymentStatus.steps.submitting" },
+  { id: "confirming", labelKey: "paymentStatus.steps.confirming" },
 ];
 
 export default function PaymentStatusModal({
@@ -69,6 +70,7 @@ export default function PaymentStatusModal({
   timeoutSeconds = TX_TIMEOUT_SECONDS,
   receipt,
 }: PaymentStatusModalProps) {
+  const { t } = useTranslation();
   const [now, setNow] = useState(() => Date.now());
 
   const isTerminal = status === "success" || status === "error";
@@ -152,24 +154,24 @@ export default function PaymentStatusModal({
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stellar-300/80">
-                Payment Tracker
+                {t("paymentStatus.tracker")}
               </p>
               <h3
                 id="payment-status-title"
                 className="mt-2 font-display text-xl font-semibold text-white"
               >
                 {status === "success"
-                  ? "Complete"
+                  ? t("paymentStatus.complete")
                   : status === "error"
-                    ? "Payment failed"
-                    : "Processing payment"}
+                    ? t("paymentStatus.paymentFailed")
+                    : t("paymentStatus.processingPayment")}
               </h3>
               <p className="mt-1 text-sm text-slate-400">
                 {status === "success"
-                  ? "Your transaction has been confirmed on the Stellar network."
+                  ? t("paymentStatus.successDescription")
                   : status === "error"
-                    ? "The transaction stopped before completion."
-                    : "Stay on this screen while we move through each network step."}
+                    ? t("paymentStatus.failureDescription")
+                    : t("paymentStatus.processingDescription")}
               </p>
             </div>
 
@@ -179,14 +181,14 @@ export default function PaymentStatusModal({
                 onClick={onClose}
                 className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-medium text-slate-300 transition-colors hover:border-white/20 hover:text-white"
               >
-                Close
+                {t("common.close")}
               </button>
             )}
           </div>
 
           <div className="mt-5">
             <div className="flex items-center justify-between text-xs text-slate-400">
-              <span>Progress</span>
+              <span>{t("paymentStatus.progress")}</span>
               <span>{Math.round(progress)}%</span>
             </div>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/5">
@@ -207,7 +209,7 @@ export default function PaymentStatusModal({
         </div>
 
         <div className="space-y-4 px-6 py-5">
-          {STEP_ORDER.map(({ id, label }, index) => {
+          {STEP_ORDER.map(({ id, labelKey }, index) => {
             const timing = stepTimings[id];
             const stepState = getStepState({
               id,
@@ -230,13 +232,14 @@ export default function PaymentStatusModal({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
-                        <p className="text-sm font-semibold text-white">{label}</p>
+                        <p className="text-sm font-semibold text-white">{t(labelKey)}</p>
                         <p className="text-xs text-slate-400">
-                          {getStepCaption(stepState)}
+                          {t(getStepCaptionKey(stepState))}
                         </p>
                       </div>
                       <span className="text-xs font-medium text-slate-400">
-                        {formatElapsed(timing, now)}
+                        {formatElapsed(timing, now) ??
+                          t("paymentStatus.captions.waiting")}
                       </span>
                     </div>
 
@@ -253,7 +256,7 @@ export default function PaymentStatusModal({
 
           {status === "success" && (
             <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-              <p className="font-medium">Transaction confirmed</p>
+              <p className="font-medium">{t("paymentStatus.transactionConfirmed")}</p>
               {txHash && <p className="mt-1 break-all text-emerald-100/90">{txHash}</p>}
               {explorerHref && txHash && (
                 <a
@@ -262,7 +265,7 @@ export default function PaymentStatusModal({
                   rel="noopener noreferrer"
                   className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-emerald-100 transition-colors hover:text-white"
                 >
-                  View on Stellar Expert
+                  {t("paymentStatus.viewOnStellarExpert")}
                   <ExternalLinkIcon className="h-4 w-4" />
                 </a>
               )}
@@ -275,7 +278,7 @@ export default function PaymentStatusModal({
                 className="mt-3 inline-flex items-center gap-2 rounded-lg border border-emerald-400/30 px-3 py-1.5 text-sm font-medium text-emerald-100 transition-colors hover:bg-emerald-400/10 hover:text-white print:hidden"
               >
                 <PrinterIcon className="h-4 w-4" />
-                Print receipt
+                {t("paymentStatus.printReceipt")}
               </button>
             </div>
           )}
@@ -292,51 +295,53 @@ export default function PaymentStatusModal({
         {status === "success" && (
           <div className="receipt-modal-sheet hidden" data-testid="payment-receipt-sheet">
             <p className="receipt-brand">Stellar MicroPay</p>
-            <h4 className="receipt-title">Payment Receipt</h4>
+            <h4 className="receipt-title">{t("paymentStatus.receipt.title")}</h4>
             <dl className="receipt-grid">
               <div>
-                <dt>Date / time</dt>
+                <dt>{t("paymentStatus.receipt.dateTime")}</dt>
                 <dd>{formatDateFull(receiptDate, { timezone: "UTC" })}</dd>
               </div>
               {receipt?.sender && (
                 <div>
-                  <dt>From</dt>
+                  <dt>{t("paymentStatus.receipt.from")}</dt>
                   <dd className="receipt-mono">{receipt.sender}</dd>
                 </div>
               )}
               {receipt?.recipient && (
                 <div>
-                  <dt>To</dt>
+                  <dt>{t("paymentStatus.receipt.to")}</dt>
                   <dd className="receipt-mono">{receipt.recipient}</dd>
                 </div>
               )}
               {receiptAmount && (
                 <div>
-                  <dt>Amount</dt>
+                  <dt>{t("paymentStatus.receipt.amount")}</dt>
                   <dd>{receiptAmount}</dd>
                 </div>
               )}
               {receipt?.memo && (
                 <div>
-                  <dt>Memo</dt>
+                  <dt>{t("paymentStatus.receipt.memo")}</dt>
                   <dd>{receipt.memo}</dd>
                 </div>
               )}
               {txHash && (
                 <div>
-                  <dt>Transaction hash</dt>
+                  <dt>{t("paymentStatus.receipt.transactionHash")}</dt>
                   <dd className="receipt-mono break-all">{txHash}</dd>
                 </div>
               )}
               {explorerHref && txHash && (
                 <div>
-                  <dt>Explorer</dt>
+                  <dt>{t("paymentStatus.receipt.explorer")}</dt>
                   <dd className="receipt-mono break-all">{explorerHref}</dd>
                 </div>
               )}
             </dl>
             <p className="receipt-footer">
-              {`Generated by Stellar MicroPay — printed ${formatDateFull(new Date(), { timezone: "UTC" })}.`}
+              {t("paymentStatus.receipt.generatedBy", {
+                date: formatDateFull(new Date(), { timezone: "UTC" }),
+              })}
             </p>
           </div>
         )}
@@ -364,15 +369,15 @@ function getStepState({
   return "pending";
 }
 
-function getStepCaption(state: "pending" | "current" | "complete" | "failed") {
-  if (state === "complete") return "Completed";
-  if (state === "current") return "In progress";
-  if (state === "failed") return "Failed";
-  return "Waiting";
+function getStepCaptionKey(state: "pending" | "current" | "complete" | "failed") {
+  if (state === "complete") return "paymentStatus.captions.completed";
+  if (state === "current") return "paymentStatus.captions.inProgress";
+  if (state === "failed") return "paymentStatus.captions.failed";
+  return "paymentStatus.captions.waiting";
 }
 
-function formatElapsed(timing: PaymentStepTiming, now: number) {
-  if (!timing.startedAt) return "Waiting";
+function formatElapsed(timing: PaymentStepTiming, now: number): string | null {
+  if (!timing.startedAt) return null;
 
   const end = timing.completedAt ?? now;
   const elapsedMs = Math.max(0, end - timing.startedAt);
@@ -396,6 +401,8 @@ function CountdownTimer({
   timeoutSeconds: number;
   now: number;
 }) {
+  const { t } = useTranslation();
+
   if (!startedAt) return null;
 
   const elapsedMs = now - startedAt;
@@ -431,7 +438,9 @@ function CountdownTimer({
               : "text-slate-400"
         }`}
       >
-        {isUrgent ? `${remainingSeconds}s left` : `~${remainingSeconds}s remaining`}
+        {isUrgent
+          ? t("paymentStatus.timer.secondsLeft", { seconds: remainingSeconds })
+          : t("paymentStatus.timer.secondsRemaining", { seconds: remainingSeconds })}
       </span>
     </div>
   );

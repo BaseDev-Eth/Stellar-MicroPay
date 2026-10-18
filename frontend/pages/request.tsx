@@ -4,6 +4,7 @@ import SendPaymentForm from "@/components/SendPaymentForm";
 import WalletConnect from "@/components/WalletConnect";
 import { getXLMBalance } from "@/lib/stellar";
 import { useWallet } from "@/lib/useWallet";
+import { useTranslation } from "@/contexts/I18nContext";
 
 interface PrefillData {
   destination: string;
@@ -14,6 +15,7 @@ interface PrefillData {
 
 export default function RequestPage() {
   const { publicKey } = useWallet();
+  const { t } = useTranslation();
   const router = useRouter();
   const { r } = router.query;
 
@@ -28,12 +30,12 @@ export default function RequestPage() {
         const parsedData = JSON.parse(decodedString);
 
         if (parsedData.validUntil && Date.now() > parsedData.validUntil) {
-          setError("This payment request link has expired.");
+          setError(t("request.linkExpired"));
           return;
         }
 
         if (!parsedData.destination || !parsedData.amount) {
-          setError("The request link data is incomplete or malformed.");
+          setError(t("request.linkIncomplete"));
           return;
         }
 
@@ -41,10 +43,10 @@ export default function RequestPage() {
         setError(null);
       } catch (err) {
         console.error("Invalid request link data", err);
-        setError("Invalid request link. Please check the URL.");
+        setError(t("request.linkInvalid"));
       }
     }
-  }, [r]);
+  }, [r, t]);
 
   useEffect(() => {
     if (publicKey) {
@@ -60,13 +62,13 @@ export default function RequestPage() {
         <div className="bg-red-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
           <span className="text-2xl text-red-500">⚠️</span>
         </div>
-        <h2 className="text-xl font-bold text-white mb-2">Request Unavailable</h2>
+        <h2 className="text-xl font-bold text-white mb-2">{t("request.unavailableTitle")}</h2>
         <p className="text-slate-400 mb-6">{error}</p>
         <button
           onClick={() => router.push('/dashboard')}
           className="btn-secondary w-full py-2"
         >
-          Return to Dashboard
+          {t("request.returnToDashboard")}
         </button>
       </div>
     );
@@ -75,8 +77,8 @@ export default function RequestPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-16 animate-fade-in">
       <div className="text-center mb-10">
-        <h1 className="font-display text-3xl font-bold text-white mb-3">Complete Request</h1>
-        <p className="text-slate-400">Review the requested details and connect your wallet to pay.</p>
+        <h1 className="font-display text-3xl font-bold text-white mb-3">{t("request.title")}</h1>
+        <p className="text-slate-400">{t("request.subtitle")}</p>
       </div>
 
       {!publicKey ? (
