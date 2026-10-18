@@ -57,6 +57,9 @@ const nextConfig = {
   reactStrictMode: true,
   // Required for the production Docker image (copies only what's needed)
   output: "export",
+  // Emit clean page URLs as <page>.html rather than <page>/index.html (#1471).
+  // Production nginx try_files maps clean paths (e.g. /dashboard) to $uri.html.
+  trailingSlash: false,
   // Allow Stellar SDK in browser
   webpack: (config) => {
     config.resolve.fallback = {

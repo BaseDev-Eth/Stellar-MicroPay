@@ -142,12 +142,81 @@ npm run dev
 4. Scroll down → "Add to Home Screen"
 5. App adds to home screen
 
-### Test Offline Support
-1. Visit the app while online
-2. Navigate to home page and dashboard
-3. Go offline (Airplane mode or DevTools → Offline)
-4. Reload the page
-5. Cached version should load
+### Test Offline Support (#1471)
+
+With Next.js configured for static export (`output: "export"`, `trailingSlash: false`), pages are emitted as `.html` files (e.g. `dashboard.html`). In production, nginx serves these via `try_files $uri $uri.html $uri/ /index.html;`, ensuring clean paths like `/dashboard` resolve with HTTP 200 without redirects. The service worker precaches URLs individually during installation, so a single missing or slow asset does not abort the install process.
+
+#### Production Nginx Container Precache Verification
+
+Verify all precached app shell URLs return HTTP 200 from the production nginx container:
+
+```bash
+# Start the production stack
+docker compose -f docker-compose.prod.yml up -d --build
+
+# Verify all precached routes return 200 OK
+curl -I http://localhost:80/
+curl -I http://localhost:80/dashboard
+curl -I http://localhost:80/offline.html
+curl -I http://localhost:80/manifest.json
+curl -I http://localhost:80/favicon.svg
+curl -I http://localhost:80/icon-192.png
+curl -I http://localhost:80/icon-512.png
+curl -I http://localhost:80/maskable-icon-192.png
+curl -I http://localhost:80/maskable-icon-512.png
+curl -I http://localhost:80/apple-touch-icon.png
+curl -I http://localhost:80/icon-send-96.png
+curl -I http://localhost:80/icon-receive-96.png
+curl -I http://localhost:80/icon-dashboard-96.png
+```
+
+#### Manual Offline Test Procedure
+
+1. Build and serve the production export:
+   ```bash
+   cd frontend
+   npm run build
+   npm run start # serves ./out on http://localhost:3000
+   ```
+2. Open Chrome/Chromium and navigate to `http://localhost:3000/`.
+3. Open DevTools (`F12`) → **Application** tab:
+   - **Service Workers**: Confirm the worker is registered and active.
+   - **Cache Storage** → `stellar-micropay-precache-v4`: Verify that `/`, `/dashboard`, `/offline.html`, and icons are present.
+4. Go to **Network** tab and toggle the throttling dropdown from **No throttling** to **Offline**.
+5. Reload `http://localhost:3000/`:
+   - The landing page loads from cache without network errors.
+6. In the address bar or navigation link, navigate to `http://localhost:3000/dashboard` and reload:
+   - The dashboard loads successfully from cache.
+7. Navigate to an uncached URL (e.g. `http://localhost:3000/non-existent-page`):
+   - The branded `offline.html` page renders with "You're Offline" and retry button.
+
+#### Playwright Automated Offline Test Procedure
+
+Playwright can simulate network disconnection via the CDP session or context route aborts:
+
+```typescript
+// Example Playwright test procedure for offline verification
+test('loads / and /dashboard while offline after precache install', async ({ context, page }) => {
+  // 1. Visit online to allow service worker installation and precaching
+  await page.goto('/');
+  await page.waitForFunction(() => !!navigator.serviceWorker.controller);
+
+  // 2. Simulate offline network condition
+  await context.setOffline(true);
+
+  // 3. Reload the landing page offline
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page).toHaveTitle(/Stellar MicroPay/i);
+
+  // 4. Navigate to dashboard offline
+  await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByRole('heading', { name: /Dashboard/i })).toBeVisible();
+
+  // 5. Navigate to an uncached route to verify offline.html fallback
+  await page.goto('/uncached-route', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByText(/You're Offline/i)).toBeVisible();
+});
+```
 
 ### Chrome DevTools Testing
 1. Open DevTools (F12)

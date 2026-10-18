@@ -72,8 +72,17 @@ async function handleNavigation(request) {
     // Online navigation failed. Serve the cached page if we have one,
     // otherwise fall back to the branded offline page (#1474) instead of
     // surfacing the browser's default error page.
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    const cleanPath = pathname.length > 1 && pathname.endsWith("/")
+      ? pathname.slice(0, -1)
+      : pathname;
+
     return (
       (await caches.match(request)) ||
+      (await caches.match(pathname)) ||
+      (await caches.match(cleanPath)) ||
+      (await caches.match(`${cleanPath}.html`)) ||
       (await caches.match("/offline.html")) ||
       Response.error()
     );
@@ -82,7 +91,24 @@ async function handleNavigation(request) {
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(PRECACHE).then((cache) => cache.addAll(APP_SHELL_URLS))
+    caches.open(PRECACHE).then(async (cache) => {
+      // Cache assets individually so a single failed URL does not abort
+      // the entire service worker installation (#1471).
+      await Promise.all(
+        APP_SHELL_URLS.map(async (url) => {
+          try {
+            const response = await fetch(url);
+            if (response.ok) {
+              await cache.put(url, response);
+            } else {
+              console.warn(`[sw] Failed to precache ${url}: HTTP ${response.status}`);
+            }
+          } catch (error) {
+            console.warn(`[sw] Failed to precache ${url}:`, error);
+          }
+        })
+      );
+    })
   );
   // No automatic skipWaiting here (#1475): a newly installed worker stays in
   // "waiting" until the page confirms the "new version available" prompt
