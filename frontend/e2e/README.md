@@ -23,6 +23,21 @@ cd frontend
 npx playwright test
 ```
 
+### Running Automated Accessibility Checks (#1470)
+
+The suite includes automated WCAG accessibility audits powered by `@axe-core/playwright` (`e2e/a11y.spec.ts`). It scans six key routes (landing `/`, dashboard `/dashboard`, send `/pay`, transactions `/transactions`, tip page `/tip/testuser`, and settings `/settings`) in both the default light theme and with the Spanish (`es`) locale.
+
+To run only the accessibility checks locally:
+
+```sh
+cd frontend
+npm run test:a11y
+# or
+npx playwright test e2e/a11y.spec.ts --project=chromium
+```
+
+Any new `serious` or `critical` violation fails CI. Known issues pending design or upstream fixes are documented in `frontend/e2e/a11y-allowlist.json` with issue links and rationale.
+
 ## Running in CI
 
 - All tests run on every PR

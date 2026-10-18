@@ -1,0 +1,9 @@
+[
+  {
+    "id": "color-contrast",
+    "description": "Certain low-contrast secondary labels and badge borders are awaiting updated palette tokens from design",
+    "issue": "https://github.com/Emmy123222/Stellar-MicroPay/issues/1469",
+    "impact": "serious",
+    "routes": ["/", "/dashboard", "/pay", "/transactions", "/tip/testuser", "/settings"]
+  }
+]
