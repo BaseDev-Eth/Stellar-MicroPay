@@ -208,7 +208,10 @@ export default function Navbar({ onOpenAssistant }: NavbarProps) {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-[rgba(14,165,233,0.12)] bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:bg-cosmos-900/80">
+    <nav
+      aria-label={t("navbar.mainNavigation") || "Main Navigation"}
+      className="sticky top-0 z-50 border-b border-[rgba(14,165,233,0.12)] bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:bg-cosmos-900/80"
+    >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-4">
           <Link href="/" className="group flex min-w-0 items-center gap-2">

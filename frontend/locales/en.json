@@ -9,9 +9,11 @@
     "continue": "Continue",
     "copy": "Copy",
     "copied": "Copied!",
-    "unavailable": "Unavailable"
+    "unavailable": "Unavailable",
+    "skipToContent": "Skip to content"
   },
   "navbar": {
+    "mainNavigation": "Main navigation",
     "home": "Home",
     "dashboard": "Dashboard",
     "trade": "Trade",

@@ -9,9 +9,11 @@
     "continue": "متابعة",
     "copy": "نسخ",
     "copied": "تم النسخ!",
-    "unavailable": "غير متوفر"
+    "unavailable": "غير متوفر",
+    "skipToContent": "الانتقال إلى المحتوى الرئيسي"
   },
   "navbar": {
+    "mainNavigation": "التنقل الرئيسي",
     "home": "الرئيسية",
     "dashboard": "لوحة التحكم",
     "trade": "تداول",

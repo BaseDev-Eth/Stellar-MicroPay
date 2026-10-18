@@ -72,10 +72,17 @@ export default function PaymentRequestGenerator() {
       </Head>
     )}
     <div className="card animate-fade-in border-stellar-400/20">
-      <h2 className="font-display text-lg font-semibold text-white mb-6 flex items-center gap-2">
-        <LinkIcon className="w-5 h-5 text-stellar-400" />
-        Request Payment
-      </h2>
+      {isStandalonePage ? (
+        <h1 className="font-display text-lg font-semibold text-white mb-6 flex items-center gap-2">
+          <LinkIcon className="w-5 h-5 text-stellar-400" />
+          Request Payment
+        </h1>
+      ) : (
+        <h2 className="font-display text-lg font-semibold text-white mb-6 flex items-center gap-2">
+          <LinkIcon className="w-5 h-5 text-stellar-400" />
+          Request Payment
+        </h2>
+      )}
 
       <div className="space-y-4">
         <div>

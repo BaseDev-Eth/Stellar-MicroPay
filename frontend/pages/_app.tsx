@@ -14,7 +14,7 @@ import RouteAnnouncer from "@/components/RouteAnnouncer";
 import { WalletProvider, useWallet } from "@/lib/useWallet";
 import ToastProvider from "@/lib/ToastContext";
 import ServiceWorkerUpdateToast from "@/components/ServiceWorkerUpdateToast";
-import { I18nProvider } from "@/contexts/I18nContext";
+import { I18nProvider, useTranslation } from "@/contexts/I18nContext";
 
 const AIPaymentAssistant = dynamic(() => import("@/components/AIPaymentAssistant"), {
   ssr: false,
@@ -138,6 +138,7 @@ function AppShell({
 }) {
   const { publicKey } = useWallet();
   const router = useRouter();
+  const { t } = useTranslation();
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   useEffect(() => {
@@ -183,8 +184,14 @@ function AppShell({
         <div role="alert" className="w-full bg-amber-500/15 px-4 py-2 text-center text-sm text-amber-200">You&apos;re offline — data may not be up to date.</div>
       )}
       <div className="min-h-screen bg-white bg-grid transition-colors duration-300 dark:bg-cosmos-900">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:inline-block focus:rounded-lg focus:bg-stellar-500 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          {t("common.skipToContent")}
+        </a>
         <Navbar onOpenAssistant={() => setIsAssistantOpen(true)} />
-        <main>
+        <main id="main-content" tabIndex={-1} className="outline-none">
           <Component {...pageProps} stellarURI={stellarURI} />
         </main>
         <InstallBanner />
