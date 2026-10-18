@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 
 interface TourStep {
   id: string;
@@ -42,6 +43,7 @@ interface OnboardingTourProps {
 
 export default function OnboardingTour({ isVisible, onComplete, onSkip }: OnboardingTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     if (!isVisible) return;
@@ -49,7 +51,10 @@ export default function OnboardingTour({ isVisible, onComplete, onSkip }: Onboar
     const step = tourSteps[currentStep];
     const targetElement = document.querySelector(step.target);
     if (targetElement) {
-      targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      targetElement.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "center",
+      });
       targetElement.classList.add("tour-highlight");
     }
 

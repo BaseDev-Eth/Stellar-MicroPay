@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import clsx from "clsx";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 
 export interface ToastProps {
   message: string;
@@ -23,6 +24,7 @@ export interface ToastAction {
 
 export default function Toast({ message, type = "info", onClose, duration = 3000, action }: ToastProps) {
   const [visible, setVisible] = useState(true);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     // A duration of 0 (or less) keeps the toast on screen until replaced.
@@ -31,12 +33,16 @@ export default function Toast({ message, type = "info", onClose, duration = 3000
     const timer = setTimeout(() => {
       setVisible(false);
       if (onClose) {
-        setTimeout(onClose, 300); // Wait for fade out
+        if (prefersReducedMotion) {
+          onClose();
+        } else {
+          setTimeout(onClose, 300); // Wait for fade out
+        }
       }
     }, duration);
 
     return () => clearTimeout(timer);
-  }, [duration, onClose]);
+  }, [duration, onClose, prefersReducedMotion]);
 
   return (
     <div
@@ -45,7 +51,8 @@ export default function Toast({ message, type = "info", onClose, duration = 3000
       className={clsx(
         "fixed bottom-6 left-1/2 -translate-x-1/2 z-50",
         "px-4 py-2.5 rounded-xl text-sm font-medium text-white",
-        "border shadow-xl transition-all duration-300",
+        "border shadow-xl",
+        prefersReducedMotion ? "transition-none" : "transition-all duration-300",
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
         type === "success" && "bg-emerald-600 border-emerald-500",
         type === "error" && "bg-red-600 border-red-500",

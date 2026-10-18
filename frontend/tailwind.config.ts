@@ -35,6 +35,9 @@ const config: Config = {
         display: ["'Space Grotesk'", "sans-serif"],
         body: ["'Inter'", "sans-serif"],
       },
+      // Animation definitions. Under prefers-reduced-motion: reduce,
+      // globals.css neutralizes all animations and transitions (WCAG 2.3.3, #1468).
+      // Authors should also use motion-safe: / motion-reduce: utility variants where needed.
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "fade-in": "fadeIn 0.5s ease-in-out",

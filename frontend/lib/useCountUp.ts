@@ -1,12 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
+import { usePrefersReducedMotion } from './usePrefersReducedMotion';
 
 export function useCountUp(target: number, duration: number = 2000, startOnView: boolean = true) {
-  const [count, setCount] = useState(0);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const [count, setCount] = useState(() => (prefersReducedMotion ? target : 0));
   const [isVisible, setIsVisible] = useState(!startOnView);
   const [hasAnimated, setHasAnimated] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (prefersReducedMotion) {
+      setCount(target);
+      return;
+    }
+
     if (!startOnView) {
       setIsVisible(true);
     } else if (elementRef.current) {
@@ -23,12 +30,19 @@ export function useCountUp(target: number, duration: number = 2000, startOnView:
       observer.observe(elementRef.current);
       return () => observer.disconnect();
     }
-  }, [startOnView, hasAnimated]);
+  }, [startOnView, hasAnimated, prefersReducedMotion, target]);
 
   useEffect(() => {
+    if (prefersReducedMotion) {
+      setCount(target);
+      return;
+    }
+
     if (!isVisible || hasAnimated) return;
 
     let startTime: number;
+    let animationFrameId: number;
+
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
@@ -36,12 +50,15 @@ export function useCountUp(target: number, duration: number = 2000, startOnView:
       setCount(Math.floor(progress * target));
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        animationFrameId = requestAnimationFrame(animate);
       }
     };
 
-    requestAnimationFrame(animate);
-  }, [isVisible, target, duration, hasAnimated]);
+    animationFrameId = requestAnimationFrame(animate);
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, [isVisible, target, duration, hasAnimated, prefersReducedMotion]);
 
-  return { count, elementRef };
+  return { count: prefersReducedMotion ? target : count, elementRef };
 }

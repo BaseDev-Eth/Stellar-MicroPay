@@ -347,3 +347,15 @@
 @media (prefers-reduced-motion: reduce) {
   .confetti__piece { animation: none; opacity: 0; }
 }
+
+/* ── Global Reduced-Motion Strategy (WCAG 2.3.3, #1468) ──────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
