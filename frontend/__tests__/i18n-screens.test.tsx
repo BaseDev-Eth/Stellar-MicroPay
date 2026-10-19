@@ -121,4 +121,27 @@ describe("Dashboard internationalisation", () => {
     expect(screen.queryByText("Recent Activity")).not.toBeInTheDocument();
     expect(screen.queryByText("Dashboard")).not.toBeInTheDocument();
   });
+
+  it("renders German when the stored locale is de (#1457)", async () => {
+    window.localStorage.setItem(LOCALE_STORAGE_KEY, "de");
+
+    render(
+      <I18nProvider>
+        <Dashboard />
+      </I18nProvider>
+    );
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Dashboard" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Sende und empfange XLM weltweit")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Wallet-Adresse")).toBeInTheDocument();
+    expect(screen.getByText("Letzte Aktivität")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Send and receive XLM globally")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Recent Activity")).not.toBeInTheDocument();
+  });
 });

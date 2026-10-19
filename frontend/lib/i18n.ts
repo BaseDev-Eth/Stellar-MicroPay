@@ -34,16 +34,17 @@
 import en from "@/locales/en.json";
 import es from "@/locales/es.json";
 import fr from "@/locales/fr.json";
+import de from "@/locales/de.json";
 import ar from "@/locales/ar.json";
 
 /** Locales the app ships with. */
-export type Locale = "en" | "es" | "fr" | "ar" | "he";
+export type Locale = "en" | "es" | "fr" | "de" | "ar" | "he";
 
 /** English is the default and the fallback for every missing key. */
 export const DEFAULT_LOCALE: Locale = "en";
 
 /** Every supported locale, in picker order. */
-export const SUPPORTED_LOCALES: readonly Locale[] = ["en", "es", "fr", "ar"];
+export const SUPPORTED_LOCALES: readonly Locale[] = ["en", "es", "fr", "de", "ar"];
 
 /** Locales that use right-to-left layout (#1318). */
 export const RTL_LOCALES: readonly Locale[] = ["ar", "he"];
@@ -61,6 +62,7 @@ export const LOCALE_LABELS: Record<Locale, string> = {
   en: "English",
   es: "Español",
   fr: "Français",
+  de: "Deutsch",
   ar: "العربية",
   he: "עברית",
 };
@@ -99,6 +101,7 @@ const MESSAGES: Record<Locale, MessageTree> = {
   en: en as MessageTree,
   es: es as MessageTree,
   fr: fr as MessageTree,
+  de: de as MessageTree,
   ar: ar as MessageTree,
   he: en as MessageTree, // Hebrew falls back to English strings with RTL direction
 };
@@ -107,7 +110,7 @@ const MESSAGES: Record<Locale, MessageTree> = {
 export function isLocale(value: unknown): value is Locale {
   return (
     typeof value === "string" &&
-    (["en", "es", "fr", "ar", "he"] as readonly string[]).includes(value)
+    (["en", "es", "fr", "de", "ar", "he"] as readonly string[]).includes(value)
   );
 }
 
