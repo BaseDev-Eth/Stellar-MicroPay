@@ -24,6 +24,7 @@ import Toast from "@/components/Toast";
 import WalletConnect from "@/components/WalletConnect";
 import { useWallet } from "@/lib/useWallet";
 import { useTranslation } from "@/contexts/I18nContext";
+import Head from "next/head";
 import {
   formatAsset,
   formatNumber,
@@ -130,22 +131,31 @@ export default function Trade() {
 
   if (!publicKey) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-        <div className="mb-10 text-center">
-          <h1 className="mb-3 font-display text-3xl font-bold text-white">
-            {t("trade.title")}
-          </h1>
-          <p className="text-slate-400">
-            {t("trade.connectWallet")}
-          </p>
+      <>
+        <Head>
+          <title>{t("pages.trade.title")}</title>
+        </Head>
+        <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
+          <div className="mb-10 text-center">
+            <h1 className="mb-3 font-display text-3xl font-bold text-white">
+              Stellar DEX Trading
+            </h1>
+            <p className="text-slate-400">
+              Connect your wallet to trade XLM and USDC on the Stellar DEX.
+            </p>
+          </div>
+          <WalletConnect />
         </div>
-        <WalletConnect />
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <>
+      <Head>
+        <title>{t("pages.trade.title")}</title>
+      </Head>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold text-white mb-2">
           {t("trade.title")}
@@ -362,6 +372,7 @@ export default function Trade() {
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -19,6 +19,7 @@ type ResolveState =
 export default function TipPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { t } = useTranslation();
   const routeUsername = useMemo(() => {
     const raw = router.query.username;
     return typeof raw === "string" ? raw : null;
@@ -96,12 +97,16 @@ export default function TipPage() {
     };
   }, [routeUsername, router.isReady, t]);
 
-  const pageTitle =
+  const displayName =
     resolveState.status === "ready"
-      ? `Tip @${resolveState.account.username} | Stellar MicroPay`
+      ? `@${resolveState.account.username}`
       : routeUsername
-        ? `Tip @${routeUsername} | Stellar MicroPay`
-        : "Tip Creator | Stellar MicroPay";
+        ? `@${routeUsername}`
+        : null;
+
+  const pageTitle = displayName
+    ? t("pages.tip.title", { username: displayName })
+    : t("pages.tip.fallbackTitle");
 
   const ogUsername =
     resolveState.status === "ready" ? resolveState.account.username : routeUsername || "creator";

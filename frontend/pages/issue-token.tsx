@@ -35,6 +35,7 @@ import {
 } from "@/lib/stellar";
 import { getConnectedPublicKey, signTransactionWithWallet } from "@/lib/wallet";
 import { useWallet } from "@/lib/useWallet";
+import { useTranslation } from "@/contexts/I18nContext";
 import { copyToClipboard } from "@/utils/format";
 import { useTranslation } from "@/contexts/I18nContext";
 
@@ -247,7 +248,7 @@ export default function IssueTokenPage() {
   return (
     <>
       <Head>
-        <title>Issue a Token | Stellar-MicroPay</title>
+        <title>{t("pages.issueToken.title")}</title>
         <meta
           name="description"
           content="Issue a custom Stellar asset: pick an asset code, set the issuer and distributor, create a trustline, issue the asset and publish a stellar.toml."

@@ -4,6 +4,7 @@
  */
 
 import { useRouter } from "next/router";
+import Head from "next/head";
 import { useEffect, useState } from "react";
 import { Transaction, TransactionBuilder } from "@stellar/stellar-sdk";
 import { getNetworkPassphrase } from "@/lib/stellar";
@@ -62,23 +63,32 @@ export default function MultiSigSignPage() {
         <div className="text-center">
           <p className="text-slate-400">{t("multiSigSign.loading")}</p>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error && !transaction) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16">
-        <div className="text-center">
-          <p className="text-red-400">{error}</p>
+      <>
+        <Head>
+          <title>{t("pages.multiSigSign.title")}</title>
+        </Head>
+        <div className="max-w-2xl mx-auto px-4 py-16">
+          <div className="text-center">
+            <p className="text-red-400">{error}</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-16">
-      <h1 className="font-display text-2xl font-bold text-white mb-6">{t("multiSigSign.title")}</h1>
+    <>
+      <Head>
+        <title>{t("pages.multiSigSign.title")}</title>
+      </Head>
+      <div className="max-w-2xl mx-auto px-4 py-16">
+      <h1 className="font-display text-2xl font-bold text-white mb-6">Sign Multi-Signature Transaction</h1>
 
       {transaction && (
         <div className="card mb-6">
@@ -147,6 +157,7 @@ export default function MultiSigSignPage() {
       {error && (
         <p className="text-red-400 text-sm mt-4">{error}</p>
       )}
-    </div>
+      </div>
+    </>
   );
 }

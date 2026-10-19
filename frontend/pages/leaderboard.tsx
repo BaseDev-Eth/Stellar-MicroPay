@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
 import { shortenAddress } from "@/utils/format";
+import { useTranslation } from "@/contexts/I18nContext";
 import { formatNumber } from "@/utils/intlFormatters";
 import { useTranslation } from "@/contexts/I18nContext";
 

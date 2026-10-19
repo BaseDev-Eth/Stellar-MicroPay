@@ -5,9 +5,11 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import Head from "next/head";
 import { useWallet } from "@/lib/useWallet";
 import { useTranslation } from "@/contexts/I18nContext";
 import { signTransactionWithWallet } from "@/lib/wallet";
+import { useTranslation } from "@/contexts/I18nContext";
 import { formatXLM } from "@/utils/intlFormatters";
 import { buildPaymentTransaction, submitTransaction, getXLMBalance, STELLAR_MINIMUM_ACCOUNT_BALANCE_XLM } from "@/lib/stellar";
 
@@ -180,9 +182,13 @@ export default function StreamsPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="font-display text-3xl font-bold text-white mb-2">{t("streams.title")}</h1>
-      <p className="text-slate-400 mb-8">{t("streams.subtitle")}</p>
+    <>
+      <Head>
+        <title>{t("pages.streams.title")}</title>
+      </Head>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+      <h1 className="font-display text-3xl font-bold text-white mb-2">Streaming Payments</h1>
+      <p className="text-slate-400 mb-8">Open, view, claim, and close Soroban streaming payment contracts.</p>
 
       {error && (
         <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400">
@@ -397,6 +403,7 @@ export default function StreamsPage() {
           )}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

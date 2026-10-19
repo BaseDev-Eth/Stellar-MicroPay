@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import WalletConnect from "@/components/WalletConnect";
 import { useWallet } from "@/lib/useWallet";
+import { useTranslation } from "@/contexts/I18nContext";
 import { formatNumber } from "@/utils/intlFormatters";
 import { useTranslation } from "@/contexts/I18nContext";
 
@@ -29,6 +30,7 @@ export default function Home() {
   const { publicKey } = useWallet();
   const { t } = useTranslation();
   const router = useRouter();
+  const { t } = useTranslation();
   const [showConnect, setShowConnect] = useState(false);
 
   const handleWalletConnect = (_publicKey: string) => {
@@ -39,7 +41,7 @@ export default function Home() {
   return (
     <div className="relative overflow-hidden cursor-default select-none">
       <Head>
-        <title>Home | Stellar-MicroPay</title>
+        <title>{t("pages.home.title")}</title>
         <meta name="description" content="Experience lightning-fast micropayments on the Stellar network. Send funds globally for fractions of a cent." />
         <link rel="canonical" href="https://stellar-micropay.vercel.app/" />
       </Head>
