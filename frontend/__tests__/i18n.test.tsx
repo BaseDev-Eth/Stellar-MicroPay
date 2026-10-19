@@ -5,6 +5,7 @@ import "@testing-library/jest-dom";
 
 import en from "@/locales/en.json";
 import es from "@/locales/es.json";
+import fr from "@/locales/fr.json";
 import ar from "@/locales/ar.json";
 import {
   DEFAULT_LOCALE,
@@ -129,11 +130,13 @@ describe("i18n core", () => {
     expect(isLocale("es")).toBe(true);
     expect(isLocale("ar")).toBe(true);
     expect(isLocale("he")).toBe(true);
-    expect(isLocale("fr")).toBe(false);
+    expect(isLocale("fr")).toBe(true);
+    expect(isLocale("zh")).toBe(false);
     expect(isLocale(null)).toBe(false);
-    expect(SUPPORTED_LOCALES).toEqual(["en", "es", "ar"]);
+    expect(SUPPORTED_LOCALES).toEqual(["en", "es", "fr", "ar"]);
     expect(DEFAULT_LOCALE).toBe("en");
     expect(LOCALE_LABELS.es).toBe("Español");
+    expect(LOCALE_LABELS.fr).toBe("Français");
     expect(LOCALE_LABELS.ar).toBe("العربية");
   });
 
@@ -269,6 +272,7 @@ describe("browser locale detection (#1459)", () => {
       expect(matchLocale("en-GB")).toBe("en");
       expect(matchLocale("ar-EG")).toBe("ar");
       expect(matchLocale("zh-Hant-TW")).toBeUndefined();
+      expect(matchLocale("fr-FR")).toBe("fr");
     });
 
     it("is case- and separator-insensitive", () => {
@@ -278,7 +282,7 @@ describe("browser locale detection (#1459)", () => {
     });
 
     it("reports languages we ship no catalog for as unmatched", () => {
-      expect(matchLocale("fr-FR")).toBeUndefined();
+      expect(matchLocale("ja-JP")).toBeUndefined();
       expect(matchLocale("de")).toBeUndefined();
       expect(matchLocale("")).toBeUndefined();
       // Hebrew is a valid Locale for RTL layout (#1318) but ships no catalog.
@@ -288,25 +292,25 @@ describe("browser locale detection (#1459)", () => {
 
   describe("detectBrowserLocale", () => {
     it("prefers the first browser language that has a catalog", () => {
-      expect(detectBrowserLocale(["fr-FR", "es-MX", "en-US"])).toBe("es");
+      expect(detectBrowserLocale(["fr-FR", "es-MX", "en-US"])).toBe("fr");
       expect(detectBrowserLocale(["de-DE", "ar-EG"])).toBe("ar");
       expect(detectBrowserLocale(["en-US", "es-MX"])).toBe("en");
     });
 
     it("falls back to English for unsupported languages", () => {
-      expect(detectBrowserLocale(["fr-FR", "de-DE"])).toBe("en");
+      expect(detectBrowserLocale(["zh-Hant-TW", "ja-JP"])).toBe("en");
       expect(detectBrowserLocale([])).toBe("en");
       expect(detectBrowserLocale([""])).toBe("en");
     });
 
     it("reads navigator.languages and then navigator.language", () => {
       setBrowserLanguages(["fr-FR", "es-MX"], "fr-FR");
-      expect(detectBrowserLocale()).toBe("es");
+      expect(detectBrowserLocale()).toBe("fr");
 
       setBrowserLanguages([], "ar-EG");
       expect(detectBrowserLocale()).toBe("ar");
 
-      setBrowserLanguages(["fr-FR"], "fr-FR");
+      setBrowserLanguages(["ja-JP"], "ja-JP");
       expect(detectBrowserLocale()).toBe("en");
     });
   });
@@ -330,7 +334,7 @@ describe("browser locale detection (#1459)", () => {
     });
 
     it("falls back to English when the browser language is unsupported", () => {
-      setBrowserLanguages(["fr-FR", "de-DE"], "fr-FR");
+      setBrowserLanguages(["zh-Hant-TW", "ja-JP"], "zh-Hant-TW");
       expect(resolveInitialLocale()).toBe(DEFAULT_LOCALE);
     });
 
@@ -385,11 +389,12 @@ describe("browser locale detection (#1459)", () => {
 describe("locale files", () => {
   it("define exactly the same keys", () => {
     expect(collectKeys(es).sort()).toEqual(collectKeys(en).sort());
+    expect(collectKeys(fr).sort()).toEqual(collectKeys(en).sort());
     expect(collectKeys(ar).sort()).toEqual(collectKeys(en).sort());
   });
 
   it("have no empty strings", () => {
-    const empty = [en, es, ar].flatMap((tree) =>
+    const empty = [en, es, fr, ar].flatMap((tree) =>
       collectKeys(tree).filter((key) => lookupMessage(tree as never, key) === "")
     );
 
@@ -432,7 +437,7 @@ describe("I18nProvider / useTranslation", () => {
 
     expect(screen.getByTestId("locale")).toHaveTextContent("en");
     expect(screen.getByTestId("heading")).toHaveTextContent("Dashboard");
-    expect(screen.getByTestId("available")).toHaveTextContent("en,es,ar");
+    expect(screen.getByTestId("available")).toHaveTextContent("en,es,fr,ar");
   });
 
   it("switches locale immediately without a page reload", async () => {
@@ -501,7 +506,7 @@ describe("I18nProvider / useTranslation", () => {
   });
 
   it("opens in English when the browser language has no catalog (#1459)", async () => {
-    setBrowserLanguages(["fr-FR", "de-DE"], "fr-FR");
+    setBrowserLanguages(["zh-Hant-TW", "ja-JP"], "zh-Hant-TW");
 
     render(
       <I18nProvider>

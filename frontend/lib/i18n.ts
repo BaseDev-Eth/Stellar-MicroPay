@@ -33,16 +33,17 @@
 
 import en from "@/locales/en.json";
 import es from "@/locales/es.json";
+import fr from "@/locales/fr.json";
 import ar from "@/locales/ar.json";
 
 /** Locales the app ships with. */
-export type Locale = "en" | "es" | "ar" | "he";
+export type Locale = "en" | "es" | "fr" | "ar" | "he";
 
 /** English is the default and the fallback for every missing key. */
 export const DEFAULT_LOCALE: Locale = "en";
 
 /** Every supported locale, in picker order. */
-export const SUPPORTED_LOCALES: readonly Locale[] = ["en", "es", "ar"];
+export const SUPPORTED_LOCALES: readonly Locale[] = ["en", "es", "fr", "ar"];
 
 /** Locales that use right-to-left layout (#1318). */
 export const RTL_LOCALES: readonly Locale[] = ["ar", "he"];
@@ -59,6 +60,7 @@ export const LOCALE_STORAGE_KEY = "stellar-micropay:locale";
 export const LOCALE_LABELS: Record<Locale, string> = {
   en: "English",
   es: "Español",
+  fr: "Français",
   ar: "العربية",
   he: "עברית",
 };
@@ -96,6 +98,7 @@ type MessageTree = Record<string, unknown>;
 const MESSAGES: Record<Locale, MessageTree> = {
   en: en as MessageTree,
   es: es as MessageTree,
+  fr: fr as MessageTree,
   ar: ar as MessageTree,
   he: en as MessageTree, // Hebrew falls back to English strings with RTL direction
 };
@@ -104,7 +107,7 @@ const MESSAGES: Record<Locale, MessageTree> = {
 export function isLocale(value: unknown): value is Locale {
   return (
     typeof value === "string" &&
-    (["en", "es", "ar", "he"] as readonly string[]).includes(value)
+    (["en", "es", "fr", "ar", "he"] as readonly string[]).includes(value)
   );
 }
 
@@ -131,7 +134,7 @@ function primarySubtag(tag: string): string {
  * @example
  * matchLocale("es-MX") // "es"
  * matchLocale("en-GB") // "en"
- * matchLocale("fr-FR") // undefined
+ * matchLocale("fr-FR") // "fr"
  */
 export function matchLocale(tag: string): Locale | undefined {
   const subtag = primarySubtag(tag);
@@ -143,7 +146,7 @@ export function matchLocale(tag: string): Locale | undefined {
  *
  * `navigator.languages` (most preferred first) is consulted before
  * `navigator.language`, and the first entry with a catalog wins — a browser set
- * to `["fr-FR", "es-MX"]` opens in Spanish. Anything unsupported, an empty or
+ * to `["fr-FR", "es-MX"]` opens in French. Anything unsupported, an empty or
  * missing `navigator` (SSR), or a throwing getter falls back to English.
  *
  * @param languages Optional tag list, used by tests; defaults to the browser's.

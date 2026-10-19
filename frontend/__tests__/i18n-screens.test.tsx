@@ -100,4 +100,25 @@ describe("Dashboard internationalisation", () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Recent Activity")).not.toBeInTheDocument();
   });
+
+  it("renders French when the stored locale is fr (#1455)", async () => {
+    window.localStorage.setItem(LOCALE_STORAGE_KEY, "fr");
+
+    render(
+      <I18nProvider>
+        <Dashboard />
+      </I18nProvider>
+    );
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Tableau de bord" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Envoie et reçois des XLM dans le monde entier")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Adresse du portefeuille")).toBeInTheDocument();
+    expect(screen.getByText("Activité récente")).toBeInTheDocument();
+    expect(screen.queryByText("Recent Activity")).not.toBeInTheDocument();
+    expect(screen.queryByText("Dashboard")).not.toBeInTheDocument();
+  });
 });
