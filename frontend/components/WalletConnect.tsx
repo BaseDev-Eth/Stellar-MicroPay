@@ -11,8 +11,10 @@ import {
   EXTENSION_URLS,
   performSEP0010Auth,
   getLedgerPublicKey,
-  isLedgerSupported
+  isLedgerSupported,
+  type LedgerErrorCode,
 } from "@/lib/wallet";
+import LedgerErrorNotice from "@/components/LedgerErrorNotice";
 import { useWallet } from "@/lib/useWallet";
 import { useTranslation } from "@/contexts/I18nContext";
 
@@ -28,6 +30,7 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
   const [loading, setLoading] = useState(false);
   const [step, setStep]       = useState<"idle" | "connecting" | "authenticating">("idle");
   const [error, setError]     = useState<string | null>(null);
+  const [ledgerError, setLedgerError] = useState<{ code: LedgerErrorCode; detail: string } | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [browser, setBrowser] = useState<"chrome" | "firefox" | "other">("other");
   const [selectedWallet, setSelectedWallet] = useState<WalletType | null>(null);
@@ -43,6 +46,7 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
     setSelectedWallet("freighter");
     setLoading(true);
     setError(null);
+    setLedgerError(null);
     setStep("connecting");
 
     const installed = await isFreighterInstalled();
@@ -82,12 +86,20 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
     setSelectedWallet("ledger");
     setLoading(true);
     setError(null);
+    setLedgerError(null);
     setStep("connecting");
 
-    const { publicKey, error: ledgerError } = await getLedgerPublicKey();
+    const { publicKey, error: connectError, errorCode, errorDetail } = await getLedgerPublicKey();
 
-    if (ledgerError || !publicKey) {
-      setError(ledgerError || t("walletConnect.noLedgerPublicKey"));
+    if (errorCode) {
+      setLedgerError({ code: errorCode, detail: errorDetail ?? "" });
+      setLoading(false);
+      setStep("idle");
+      return;
+    }
+
+    if (connectError || !publicKey) {
+      setError(connectError || t("walletConnect.noLedgerPublicKey"));
       setLoading(false);
       setStep("idle");
       return;
@@ -95,16 +107,25 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
 
     // SEP-0010: prove ownership of the connected wallet
     setStep("authenticating");
-    const { error: authError } = await performSEP0010Auth(publicKey);
+    const {
+      error: authError,
+      errorCode: authErrorCode,
+      errorDetail: authErrorDetail,
+    } = await performSEP0010Auth(publicKey, "ledger");
     setLoading(false);
     setStep("idle");
+
+    if (authErrorCode) {
+      setLedgerError({ code: authErrorCode, detail: authErrorDetail ?? "" });
+      return;
+    }
 
     if (authError) {
       setError(authError);
       return;
     }
 
-    connectWallet(publicKey);
+    connectWallet(publicKey, "ledger");
     onConnectSuccess?.(publicKey);
   };
 
@@ -202,6 +223,16 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
         <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-left">
           {error}
         </div>
+      )}
+
+      {ledgerError && (
+        <LedgerErrorNotice
+          code={ledgerError.code}
+          detail={ledgerError.detail}
+          onRetry={handleLedgerConnect}
+          retrying={loading && selectedWallet === "ledger"}
+          className="mb-4"
+        />
       )}
 
       {/* Wallet Options */}

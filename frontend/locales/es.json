@@ -1315,5 +1315,35 @@
     "tryAgain": "Inténtalo de nuevo",
     "viewOnStellarExpert": "Ver en Stellar Expert",
     "viewTxOnStellarExpert": "Ver la transacción en Stellar Expert"
+  },
+  "ledgerErrors": {
+    "deviceNotFound": {
+      "message": "No se encontró el dispositivo Ledger.",
+      "recovery": "Conecta tu Ledger con un cable USB de datos, desbloquéalo e inténtalo de nuevo."
+    },
+    "locked": {
+      "message": "Tu Ledger está bloqueado.",
+      "recovery": "Introduce tu PIN en el Ledger para desbloquearlo e inténtalo de nuevo."
+    },
+    "appNotOpen": {
+      "message": "La aplicación Stellar no está abierta en tu Ledger.",
+      "recovery": "Abre la aplicación Stellar en tu Ledger (instálala desde Ledger Live si no la tienes) e inténtalo de nuevo."
+    },
+    "rejected": {
+      "message": "La solicitud fue rechazada en tu Ledger.",
+      "recovery": "Inténtalo de nuevo y aprueba la solicitud en tu dispositivo cuando estés listo."
+    },
+    "usbPermissionDenied": {
+      "message": "El navegador no pudo acceder a tu Ledger por USB.",
+      "recovery": "Selecciona tu Ledger en el aviso USB del navegador y permite el acceso. Cierra Ledger Live u otras pestañas que puedan estar usando el dispositivo e inténtalo de nuevo."
+    },
+    "timeout": {
+      "message": "Tu Ledger no respondió a tiempo.",
+      "recovery": "Asegúrate de que el dispositivo esté activo y la aplicación Stellar abierta, e inténtalo de nuevo."
+    },
+    "unknown": {
+      "message": "Error de Ledger: {detail}",
+      "recovery": "Vuelve a conectar tu Ledger, abre la aplicación Stellar e inténtalo de nuevo."
+    }
   }
 }

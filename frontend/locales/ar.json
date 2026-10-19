@@ -1315,5 +1315,35 @@
     "tryAgain": "حاول مرة أخرى",
     "viewOnStellarExpert": "عرض على Stellar Expert",
     "viewTxOnStellarExpert": "عرض المعاملة على Stellar Expert"
+  },
+  "ledgerErrors": {
+    "deviceNotFound": {
+      "message": "لم يتم العثور على جهاز Ledger.",
+      "recovery": "وصّل جهاز Ledger بكابل USB يدعم نقل البيانات، ثم افتح قفله وحاول مرة أخرى."
+    },
+    "locked": {
+      "message": "جهاز Ledger مقفل.",
+      "recovery": "أدخل رمز PIN على جهاز Ledger لفتح قفله، ثم حاول مرة أخرى."
+    },
+    "appNotOpen": {
+      "message": "تطبيق Stellar غير مفتوح على جهاز Ledger.",
+      "recovery": "افتح تطبيق Stellar على جهاز Ledger (ثبّته من Ledger Live إن لم يكن موجودًا)، ثم حاول مرة أخرى."
+    },
+    "rejected": {
+      "message": "تم رفض الطلب على جهاز Ledger.",
+      "recovery": "حاول مرة أخرى ووافق على الطلب على جهازك عندما تكون مستعدًا."
+    },
+    "usbPermissionDenied": {
+      "message": "تعذّر على المتصفح الوصول إلى جهاز Ledger عبر USB.",
+      "recovery": "اختر جهاز Ledger في نافذة USB في المتصفح واسمح بالوصول. أغلق Ledger Live أو أي علامات تبويب أخرى قد تستخدم الجهاز، ثم حاول مرة أخرى."
+    },
+    "timeout": {
+      "message": "لم يستجب جهاز Ledger في الوقت المحدد.",
+      "recovery": "تأكد من أن الجهاز نشط وأن تطبيق Stellar مفتوح، ثم حاول مرة أخرى."
+    },
+    "unknown": {
+      "message": "خطأ في Ledger: {detail}",
+      "recovery": "أعد توصيل جهاز Ledger وافتح تطبيق Stellar وحاول مرة أخرى."
+    }
   }
 }
