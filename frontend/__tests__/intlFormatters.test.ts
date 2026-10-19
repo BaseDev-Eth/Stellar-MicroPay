@@ -493,6 +493,44 @@ describe('intlFormatters', () => {
     });
   });
 
+  describe('Brazilian Portuguese locale formatting (#1456)', () => {
+    it('formats grouped amounts with pt-BR comma decimals', () => {
+      expect(formatXLM(1234.5678, { locale: 'pt-BR' })).toMatch(
+        /^1[.,\u00a0\u202f ]234,5678 XLM$/
+      );
+    });
+
+    it('formats USDC amounts with pt-BR decimals', () => {
+      expect(formatAsset(100.123456, 'USDC', { locale: 'pt-BR' })).toBe(
+        '100,123456 USDC'
+      );
+    });
+
+    it('formats USD currency amounts for pt-BR', () => {
+      expect(
+        formatUSD(1234.56, { locale: 'pt-BR', showApprox: false })
+      ).toMatch(/1[.,\u00a0\u202f ]234,56/);
+    });
+
+    it('formats dates for pt-BR', () => {
+      const formatted = formatDateOnly(new Date('2024-01-15T10:30:00Z'), {
+        locale: 'pt-BR',
+        timezone: 'UTC',
+      });
+      expect(formatted).toContain('2024');
+      expect(formatted).toMatch(/jan/i);
+    });
+
+    it('keeps accepting machine-format amounts (#1456)', () => {
+      // <input type="number"> delivers dot-decimal e.target.value per the
+      // HTML spec regardless of UI locale, so parseFloat-based parsing keeps
+      // working for pt-BR users while display goes through Intl.
+      expect(validateAmount('1234.56', 'XLM')).toBeNull();
+      expect(validateAmount('abc', 'XLM')).not.toBeNull();
+      expect(validateAmount('', 'XLM')).not.toBeNull();
+    });
+  });
+
   describe('Performance', () => {
     it('should format numbers efficiently', () => {
       const start = performance.now();

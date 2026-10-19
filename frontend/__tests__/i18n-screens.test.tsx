@@ -144,4 +144,24 @@ describe("Dashboard internationalisation", () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Recent Activity")).not.toBeInTheDocument();
   });
+
+  it("renders Brazilian Portuguese when the stored locale is pt-BR (#1456)", async () => {
+    window.localStorage.setItem(LOCALE_STORAGE_KEY, "pt-BR");
+
+    render(
+      <I18nProvider>
+        <Dashboard />
+      </I18nProvider>
+    );
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Painel" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Envie e receba XLM globalmente")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Endereço da carteira")).toBeInTheDocument();
+    expect(screen.getByText("Atividade recente")).toBeInTheDocument();
+    expect(screen.queryByText("Recent Activity")).not.toBeInTheDocument();
+  });
 });

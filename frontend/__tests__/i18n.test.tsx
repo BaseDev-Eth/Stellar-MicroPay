@@ -7,6 +7,7 @@ import en from "@/locales/en.json";
 import es from "@/locales/es.json";
 import fr from "@/locales/fr.json";
 import de from "@/locales/de.json";
+import ptBR from "@/locales/pt-BR.json";
 import ar from "@/locales/ar.json";
 import {
   DEFAULT_LOCALE,
@@ -133,13 +134,15 @@ describe("i18n core", () => {
     expect(isLocale("he")).toBe(true);
     expect(isLocale("fr")).toBe(true);
     expect(isLocale("de")).toBe(true);
+    expect(isLocale("pt-BR")).toBe(true);
     expect(isLocale("zh")).toBe(false);
     expect(isLocale(null)).toBe(false);
-    expect(SUPPORTED_LOCALES).toEqual(["en", "es", "fr", "de", "ar"]);
+    expect(SUPPORTED_LOCALES).toEqual(["en", "es", "fr", "de", "pt-BR", "ar"]);
     expect(DEFAULT_LOCALE).toBe("en");
     expect(LOCALE_LABELS.es).toBe("Español");
     expect(LOCALE_LABELS.fr).toBe("Français");
     expect(LOCALE_LABELS.de).toBe("Deutsch");
+    expect(LOCALE_LABELS["pt-BR"]).toBe("Português (Brasil)");
     expect(LOCALE_LABELS.ar).toBe("العربية");
   });
 
@@ -277,12 +280,16 @@ describe("browser locale detection (#1459)", () => {
       expect(matchLocale("de-DE")).toBe("de");
       expect(matchLocale("zh-Hant-TW")).toBeUndefined();
       expect(matchLocale("fr-FR")).toBe("fr");
+      // Region-specific catalogs match on the full tag first (#1456).
+      expect(matchLocale("pt-BR")).toBe("pt-BR");
+      expect(matchLocale("pt")).toBe("pt-BR");
     });
 
     it("is case- and separator-insensitive", () => {
       expect(matchLocale("ES")).toBe("es");
       expect(matchLocale("es_MX")).toBe("es");
       expect(matchLocale("  es-MX  ")).toBe("es");
+      expect(matchLocale("PT_br")).toBe("pt-BR");
     });
 
     it("reports languages we ship no catalog for as unmatched", () => {
@@ -298,6 +305,7 @@ describe("browser locale detection (#1459)", () => {
     it("prefers the first browser language that has a catalog", () => {
       expect(detectBrowserLocale(["fr-FR", "es-MX", "en-US"])).toBe("fr");
       expect(detectBrowserLocale(["de-DE", "ar-EG"])).toBe("de");
+      expect(detectBrowserLocale(["pt-BR", "en-US"])).toBe("pt-BR");
       expect(detectBrowserLocale(["en-US", "es-MX"])).toBe("en");
     });
 
@@ -395,11 +403,12 @@ describe("locale files", () => {
     expect(collectKeys(es).sort()).toEqual(collectKeys(en).sort());
     expect(collectKeys(fr).sort()).toEqual(collectKeys(en).sort());
     expect(collectKeys(de).sort()).toEqual(collectKeys(en).sort());
+    expect(collectKeys(ptBR).sort()).toEqual(collectKeys(en).sort());
     expect(collectKeys(ar).sort()).toEqual(collectKeys(en).sort());
   });
 
   it("have no empty strings", () => {
-    const empty = [en, es, fr, de, ar].flatMap((tree) =>
+    const empty = [en, es, fr, de, ptBR, ar].flatMap((tree) =>
       collectKeys(tree).filter((key) => lookupMessage(tree as never, key) === "")
     );
 
@@ -442,7 +451,9 @@ describe("I18nProvider / useTranslation", () => {
 
     expect(screen.getByTestId("locale")).toHaveTextContent("en");
     expect(screen.getByTestId("heading")).toHaveTextContent("Dashboard");
-    expect(screen.getByTestId("available")).toHaveTextContent("en,es,fr,de,ar");
+    expect(screen.getByTestId("available")).toHaveTextContent(
+      "en,es,fr,de,pt-BR,ar"
+    );
   });
 
   it("switches locale immediately without a page reload", async () => {
