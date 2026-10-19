@@ -7,6 +7,7 @@
 
 import { useEffect, useRef } from "react";
 import SendPaymentForm from "@/components/SendPaymentForm";
+import { useTranslation } from "@/contexts/I18nContext";
 
 interface QuickSendModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export default function QuickSendModal({
   xlmBalance,
   usdcBalance,
 }: QuickSendModalProps) {
+  const { t } = useTranslation();
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Close on Escape key
@@ -56,14 +58,14 @@ export default function QuickSendModal({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-fade-in"
       role="dialog"
       aria-modal="true"
-      aria-label="Quick send payment"
+      aria-label={t("quickSend.dialogLabel")}
     >
       {/* Modal panel */}
       <div className="relative w-full max-w-md animate-slide-up">
         {/* Close button */}
         <button
           onClick={onClose}
-          aria-label="Close quick send modal"
+          aria-label={t("quickSend.closeAria")}
           className="absolute -top-3 -right-3 z-10 w-7 h-7 flex items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-slate-400 hover:text-white hover:border-slate-500 transition-colors shadow-lg"
         >
           <XIcon className="w-3.5 h-3.5" />
@@ -71,7 +73,7 @@ export default function QuickSendModal({
 
         {/* Keyboard hint */}
         <p className="mb-2 text-xs text-slate-500 text-right select-none">
-          Press <kbd className="px-1.5 py-0.5 rounded border border-slate-700 bg-slate-800 text-slate-400 font-mono text-xs">Esc</kbd> to close
+          {t("quickSend.press")} <kbd className="px-1.5 py-0.5 rounded border border-slate-700 bg-slate-800 text-slate-400 font-mono text-xs">Esc</kbd> {t("quickSend.toClose")}
         </p>
 
         <SendPaymentForm

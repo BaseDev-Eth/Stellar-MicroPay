@@ -5,6 +5,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "@/contexts/I18nContext";
 
 export interface RecurringPayment {
   id: string;
@@ -17,6 +18,13 @@ export interface RecurringPayment {
 }
 
 const STORAGE_KEY = "stellar-micropay:recurring-payments";
+
+/** Translation keys for each schedule interval (shared by the picker and rows). */
+const INTERVAL_KEYS: Record<RecurringPayment["interval"], string> = {
+  daily: "recurringPayments.intervalDaily",
+  weekly: "recurringPayments.intervalWeekly",
+  monthly: "recurringPayments.intervalMonthly",
+};
 
 const INTERVAL_MS: Record<RecurringPayment["interval"], number> = {
   daily: 24 * 60 * 60 * 1000,
@@ -43,15 +51,12 @@ function isDue(schedule: RecurringPayment): boolean {
   return Date.now() >= schedule.nextRunAt;
 }
 
-function describeInterval(interval: RecurringPayment["interval"]): string {
-  return interval.charAt(0).toUpperCase() + interval.slice(1);
-}
-
 export default function RecurringPayments({
   onPayNow,
 }: {
   onPayNow: (data: { destination: string; amount: string; memo: string }) => void;
 }) {
+  const { t } = useTranslation();
   const [schedules, setSchedules] = useState<RecurringPayment[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [destination, setDestination] = useState("");
@@ -105,13 +110,13 @@ export default function RecurringPayments({
   return (
     <div className="card mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-display text-lg font-semibold text-white">Recurring Payments</h2>
+        <h2 className="font-display text-lg font-semibold text-white">{t("recurringPayments.title")}</h2>
         <button
           type="button"
           onClick={() => setIsFormOpen((open) => !open)}
           className="text-xs text-stellar-400 hover:text-stellar-300 transition-colors cursor-pointer"
         >
-          {isFormOpen ? "Cancel" : "+ New"}
+          {isFormOpen ? t("common.cancel") : <>+ {t("recurringPayments.new")}</>}
         </button>
       </div>
 
@@ -121,7 +126,7 @@ export default function RecurringPayments({
             type="text"
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
-            placeholder="Recipient address (G…)"
+            placeholder={t("recurringPayments.recipientPlaceholder")}
             className="input-field font-mono text-sm"
             required
           />
@@ -132,7 +137,7 @@ export default function RecurringPayments({
               min="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="Amount (XLM)"
+              placeholder={t("recurringPayments.amountPlaceholder")}
               className="input-field text-sm flex-1"
               required
             />
@@ -140,30 +145,30 @@ export default function RecurringPayments({
               value={interval}
               onChange={(e) => setInterval(e.target.value as RecurringPayment["interval"])}
               className="input-field text-sm w-28"
-              aria-label="Interval"
+              aria-label={t("recurringPayments.intervalLabel")}
             >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
+              <option value="daily">{t(INTERVAL_KEYS.daily)}</option>
+              <option value="weekly">{t(INTERVAL_KEYS.weekly)}</option>
+              <option value="monthly">{t(INTERVAL_KEYS.monthly)}</option>
             </select>
           </div>
           <input
             type="text"
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
-            placeholder="Memo (optional)"
+            placeholder={t("recurringPayments.memoPlaceholder")}
             className="input-field text-sm"
             maxLength={28}
           />
           <button type="submit" className="btn-primary w-full text-sm">
-            Save schedule
+            {t("recurringPayments.saveSchedule")}
           </button>
         </form>
       )}
 
       {schedules.length === 0 ? (
         <p className="text-sm text-slate-400">
-          No recurring payments yet. Create a schedule to send XLM automatically.
+          {t("recurringPayments.empty")}
         </p>
       ) : (
         <ul className="space-y-2">
@@ -177,10 +182,10 @@ export default function RecurringPayments({
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <p className="font-medium text-slate-200">
-                      {schedule.amount} XLM · {describeInterval(schedule.interval)}
+                      {schedule.amount} XLM · {t(INTERVAL_KEYS[schedule.interval])}
                       {due && (
                         <span className="ml-2 rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-300">
-                          Due
+                          {t("recurringPayments.due")}
                         </span>
                       )}
                     </p>
@@ -192,12 +197,12 @@ export default function RecurringPayments({
                       onClick={() => handlePayNow(schedule)}
                       className="rounded-lg bg-stellar-500/20 px-2.5 py-1 text-xs font-semibold text-stellar-300 hover:bg-stellar-500/30 transition-colors cursor-pointer"
                     >
-                      Pay Now
+                      {t("recurringPayments.payNow")}
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDelete(schedule.id)}
-                      aria-label="Delete schedule"
+                      aria-label={t("recurringPayments.deleteSchedule")}
                       className="px-1.5 text-red-400 hover:text-red-300 cursor-pointer"
                     >
                       ×

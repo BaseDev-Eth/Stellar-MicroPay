@@ -33,16 +33,26 @@
 
 import en from "@/locales/en.json";
 import es from "@/locales/es.json";
+import fr from "@/locales/fr.json";
+import de from "@/locales/de.json";
+import ptBR from "@/locales/pt-BR.json";
 import ar from "@/locales/ar.json";
 
 /** Locales the app ships with. */
-export type Locale = "en" | "es" | "ar" | "he";
+export type Locale = "en" | "es" | "fr" | "de" | "pt-BR" | "ar" | "he";
 
 /** English is the default and the fallback for every missing key. */
 export const DEFAULT_LOCALE: Locale = "en";
 
 /** Every supported locale, in picker order. */
-export const SUPPORTED_LOCALES: readonly Locale[] = ["en", "es", "ar"];
+export const SUPPORTED_LOCALES: readonly Locale[] = [
+  "en",
+  "es",
+  "fr",
+  "de",
+  "pt-BR",
+  "ar",
+];
 
 /** Locales that use right-to-left layout (#1318). */
 export const RTL_LOCALES: readonly Locale[] = ["ar", "he"];
@@ -59,6 +69,9 @@ export const LOCALE_STORAGE_KEY = "stellar-micropay:locale";
 export const LOCALE_LABELS: Record<Locale, string> = {
   en: "English",
   es: "Español",
+  fr: "Français",
+  de: "Deutsch",
+  "pt-BR": "Português (Brasil)",
   ar: "العربية",
   he: "עברית",
 };
@@ -96,6 +109,9 @@ type MessageTree = Record<string, unknown>;
 const MESSAGES: Record<Locale, MessageTree> = {
   en: en as MessageTree,
   es: es as MessageTree,
+  fr: fr as MessageTree,
+  de: de as MessageTree,
+  "pt-BR": ptBR as MessageTree,
   ar: ar as MessageTree,
   he: en as MessageTree, // Hebrew falls back to English strings with RTL direction
 };
@@ -104,7 +120,9 @@ const MESSAGES: Record<Locale, MessageTree> = {
 export function isLocale(value: unknown): value is Locale {
   return (
     typeof value === "string" &&
-    (["en", "es", "ar", "he"] as readonly string[]).includes(value)
+    (["en", "es", "fr", "de", "pt-BR", "ar", "he"] as readonly string[]).includes(
+      value
+    )
   );
 }
 
@@ -119,9 +137,21 @@ function primarySubtag(tag: string): string {
 }
 
 /**
- * Match a BCP 47 language tag against the shipped catalogs (#1459).
+ * Reduce a BCP 47 tag to its lower-cased full form, `-`/`_` normalized.
  *
- * Only {@link SUPPORTED_LOCALES} can match, because those are the catalogs the
+ * `pt_BR` and ` pt-BR ` all collapse to `pt-br`.
+ */
+function normalizedTag(tag: string): string {
+  return tag.trim().toLowerCase().replace(/_/g, "-");
+}
+
+/**
+ * Match a BCP 47 language tag against the shipped catalogs (#1459, #1456).
+ *
+ * Region-specific catalogs such as `pt-BR` match on the full normalized tag
+ * first — `pt-BR` and `pt_br` select the Brazilian Portuguese catalog — and
+ * then on the primary subtag: `es-MX` → `es`, `pt` → `pt-BR`. Only
+ * {@link SUPPORTED_LOCALES} can match, because those are the catalogs the
  * language picker can also offer. `he` is a valid {@link Locale} (RTL layout,
  * English strings) but ships no catalog, so `he-IL` is "unsupported" and
  * detection falls through to English.
@@ -131,11 +161,22 @@ function primarySubtag(tag: string): string {
  * @example
  * matchLocale("es-MX") // "es"
  * matchLocale("en-GB") // "en"
- * matchLocale("fr-FR") // undefined
+ * matchLocale("fr-FR") // "fr"
+ * matchLocale("pt-BR") // "pt-BR"
+ * matchLocale("pt") // "pt-BR"
  */
 export function matchLocale(tag: string): Locale | undefined {
+  const normalized = normalizedTag(tag);
+
+  const exact = SUPPORTED_LOCALES.find(
+    (locale) => locale.toLowerCase() === normalized
+  );
+  if (exact) return exact;
+
   const subtag = primarySubtag(tag);
-  return SUPPORTED_LOCALES.find((locale) => locale === subtag);
+  return SUPPORTED_LOCALES.find(
+    (locale) => locale === subtag || primarySubtag(locale) === subtag
+  );
 }
 
 /**
@@ -143,7 +184,7 @@ export function matchLocale(tag: string): Locale | undefined {
  *
  * `navigator.languages` (most preferred first) is consulted before
  * `navigator.language`, and the first entry with a catalog wins — a browser set
- * to `["fr-FR", "es-MX"]` opens in Spanish. Anything unsupported, an empty or
+ * to `["fr-FR", "es-MX"]` opens in French. Anything unsupported, an empty or
  * missing `navigator` (SSR), or a throwing getter falls back to English.
  *
  * @param languages Optional tag list, used by tests; defaults to the browser's.

@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { loadContacts, type Contact } from "@/lib/contacts";
 import { shortenAddress } from "@/lib/stellar";
+import { useTranslation } from "@/contexts/I18nContext";
 
 interface ContactPickerModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export default function ContactPickerModal({
   onSelect,
   onClose,
 }: ContactPickerModalProps) {
+  const { t } = useTranslation();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [query, setQuery] = useState("");
 
@@ -53,7 +55,7 @@ export default function ContactPickerModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
       role="dialog"
       aria-modal="true"
-      aria-label="Address book"
+      aria-label={t("contactPicker.ariaLabel")}
       data-testid="contact-picker-modal"
       onClick={onClose}
     >
@@ -63,12 +65,12 @@ export default function ContactPickerModal({
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-display text-xl font-bold text-white">
-            Address Book
+            {t("contactPicker.title")}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close address book"
+            aria-label={t("contactPicker.closeAria")}
             data-testid="contact-picker-close"
             className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-white transition-colors"
           >
@@ -80,8 +82,8 @@ export default function ContactPickerModal({
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by name or address..."
-          aria-label="Search contacts"
+          placeholder={t("contactPicker.searchPlaceholder")}
+          aria-label={t("contactPicker.searchAria")}
           data-testid="contact-picker-search"
           className="input-field mb-4"
           autoFocus
@@ -90,20 +92,20 @@ export default function ContactPickerModal({
         {contacts.length === 0 ? (
           <div className="py-10 text-center" data-testid="contact-picker-empty">
             <ContactsIcon className="mx-auto mb-3 h-12 w-12 text-slate-600" />
-            <p className="text-slate-400">No contacts saved yet.</p>
+            <p className="text-slate-400">{t("contactPicker.emptyState")}</p>
             <Link
               href="/contacts"
               data-testid="contact-picker-empty-link"
               className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-stellar-400 hover:text-stellar-300 transition-colors"
             >
-              Go to Contacts
+              {t("contactPicker.goToContacts")}
               <ArrowRightIcon className="h-4 w-4" />
             </Link>
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-10 text-center" data-testid="contact-picker-no-results">
             <p className="text-slate-400">
-              No contacts match &ldquo;{query}&rdquo;.
+              {t("contactPicker.noResults", { query })}
             </p>
           </div>
         ) : (

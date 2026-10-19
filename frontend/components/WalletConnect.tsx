@@ -14,6 +14,7 @@ import {
   isLedgerSupported
 } from "@/lib/wallet";
 import { useWallet } from "@/lib/useWallet";
+import { useTranslation } from "@/contexts/I18nContext";
 
 interface WalletConnectProps {
   onConnectSuccess?: (publicKey: string) => void;
@@ -22,6 +23,7 @@ interface WalletConnectProps {
 type WalletType = "freighter" | "ledger";
 
 export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) {
+  const { t } = useTranslation();
   const { connectWallet } = useWallet();
   const [loading, setLoading] = useState(false);
   const [step, setStep]       = useState<"idle" | "connecting" | "authenticating">("idle");
@@ -55,7 +57,7 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
     const { publicKey, error: walletError } = await requestWalletConnection();
 
     if (walletError || !publicKey) {
-      setError(walletError || "Could not retrieve public key.");
+      setError(walletError || t("walletConnect.noPublicKey"));
       setLoading(false);
       setStep("idle");
       return;
@@ -85,7 +87,7 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
     const { publicKey, error: ledgerError } = await getLedgerPublicKey();
 
     if (ledgerError || !publicKey) {
-      setError(ledgerError || "Could not retrieve public key from Ledger device.");
+      setError(ledgerError || t("walletConnect.noLedgerPublicKey"));
       setLoading(false);
       setStep("idle");
       return;
@@ -121,10 +123,10 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
         </div>
 
         <h2 className="font-display text-xl font-semibold text-white mb-2 text-center">
-          Freighter not detected
+          {t("walletConnect.notDetected")}
         </h2>
         <p className="text-slate-400 text-sm mb-5 leading-relaxed text-center">
-          Freighter is a free browser extension that lets you sign Stellar transactions securely.
+          {t("walletConnect.description")}
         </p>
 
         {/* Steps */}
@@ -132,7 +134,7 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
           <li className="flex items-start gap-3">
             <span className="w-5 h-5 rounded-full bg-stellar-500/20 border border-stellar-500/30 text-stellar-400 text-xs flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
             <span>
-              Install Freighter from the{" "}
+              {t("walletConnect.installStep1")}{" "}
               <a
                 href={extensionUrl}
                 target="_blank"
@@ -146,11 +148,11 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
           </li>
           <li className="flex items-start gap-3">
             <span className="w-5 h-5 rounded-full bg-stellar-500/20 border border-stellar-500/30 text-stellar-400 text-xs flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
-            <span>Create or import your Stellar wallet in the extension</span>
+            <span>{t("walletConnect.step2")}</span>
           </li>
           <li className="flex items-start gap-3">
             <span className="w-5 h-5 rounded-full bg-stellar-500/20 border border-stellar-500/30 text-stellar-400 text-xs flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
-            <span>Come back here and click the button below</span>
+            <span>{t("walletConnect.step3")}</span>
           </li>
         </ol>
 
@@ -161,7 +163,7 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
           className="btn-primary w-full flex items-center justify-center gap-2 mb-3"
         >
           <ExternalLinkIcon className="w-4 h-4" />
-          Get Freighter for {storeName}
+          {t("walletConnect.getFreighter", { store: storeName })}
         </a>
 
         <button
@@ -172,10 +174,10 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
           {loading ? (
             <>
               <Spinner />
-              Checking...
+              {t("walletConnect.checking")}
             </>
           ) : (
-            "I've installed it — try again"
+            t("walletConnect.installedRetry")
           )}
         </button>
       </div>
@@ -190,10 +192,10 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
       </div>
 
       <h2 className="font-display text-xl font-semibold text-white mb-2">
-        Connect your wallet
+        {t("walletConnect.title")}
       </h2>
       <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-        Choose your preferred wallet to connect to the Stellar network and start sending payments.
+        {t("walletConnect.subtitle")}
       </p>
 
       {error && (
@@ -213,9 +215,9 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
           <div className="w-5 h-5 rounded bg-white/10 flex items-center justify-center">
             <WalletIcon className="w-3 h-3" />
           </div>
-          {step === "connecting" && selectedWallet === "freighter" ? <><Spinner /> Connecting...</> :
-           step === "authenticating" && selectedWallet === "freighter" ? <><Spinner /> Authenticating...</> :
-           "Connect Freighter Wallet"}
+          {step === "connecting" && selectedWallet === "freighter" ? <><Spinner /> {t("walletConnect.connecting")}</> :
+           step === "authenticating" && selectedWallet === "freighter" ? <><Spinner /> {t("walletConnect.authenticating")}</> :
+           t("walletConnect.connectFreighter")}
         </button>
 
         {/* Ledger Option */}
@@ -227,41 +229,41 @@ export default function WalletConnect({ onConnectSuccess }: WalletConnectProps) 
           <div className="w-5 h-5 rounded bg-blue-500/20 flex items-center justify-center">
             <LedgerIcon className="w-3 h-3 text-blue-400" />
           </div>
-          {step === "connecting" && selectedWallet === "ledger" ? <><Spinner /> Connecting...</> :
-           step === "authenticating" && selectedWallet === "ledger" ? <><Spinner /> Authenticating...</> :
-           "Connect Ledger Hardware Wallet"}
+          {step === "connecting" && selectedWallet === "ledger" ? <><Spinner /> {t("walletConnect.connecting")}</> :
+           step === "authenticating" && selectedWallet === "ledger" ? <><Spinner /> {t("walletConnect.authenticating")}</> :
+           t("walletConnect.connectLedger")}
         </button>
       </div>
 
       {/* Help Text */}
       <div className="space-y-3 text-xs text-slate-500">
         <div>
-          Don&apos;t have Freighter?{" "}
+          {t("walletConnect.dontHaveFreighter")}{" "}
           <a
             href={extensionUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-stellar-400 hover:underline"
           >
-            Install the extension →
+            {t("walletConnect.installExtension")}
           </a>
         </div>
 
         {!ledgerSupported && (
           <div className="text-amber-400">
-            Ledger requires Chrome, Edge, or another Chromium-based browser with WebHID support.
+            {t("walletConnect.ledgerBrowserHint")}
           </div>
         )}
 
         <div>
-          Using Ledger? Make sure your device is connected, unlocked, and the Stellar app is open.
+          {t("walletConnect.ledgerUsageHint")}
         </div>
       </div>
 
       {/* Network indicator */}
       <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-center gap-2 text-xs text-slate-500">
         <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-        Connected to{" "}
+        {t("walletConnect.connectedTo")}{" "}
         <span className="font-mono text-slate-400">
           {process.env.NEXT_PUBLIC_STELLAR_NETWORK || "testnet"}
         </span>

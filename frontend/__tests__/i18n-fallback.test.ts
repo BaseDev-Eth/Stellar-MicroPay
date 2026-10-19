@@ -50,3 +50,41 @@ describe("i18n English fallback", () => {
     });
   });
 });
+
+describe("i18n pt-BR English fallback (#1456)", () => {
+  afterEach(() => {
+    jest.resetModules();
+    jest.dontMock("@/locales/pt-BR.json");
+  });
+
+  it("uses English for keys missing from pt-BR", () => {
+    jest.isolateModules(() => {
+      jest.doMock("@/locales/pt-BR.json", () => ({
+        __esModule: true,
+        default: {
+          dashboard: { title: "Painel" },
+          common: { cancel: "Cancelar" },
+          // Plural key that only defines the required `other` form.
+          contacts: { count: { other: "{count} contatos" } },
+        },
+      }));
+
+      const { translate } = jest.requireActual("@/lib/i18n") as typeof import("@/lib/i18n");
+
+      // Present in pt-BR.
+      expect(translate("pt-BR", "dashboard.title")).toBe("Painel");
+      expect(translate("pt-BR", "common.cancel")).toBe("Cancelar");
+
+      // Missing from pt-BR — falls back to English, not to the key (#1456).
+      expect(translate("pt-BR", "dashboard.totalSent")).toBe("Total Sent");
+      expect(translate("pt-BR", "sendPayment.confirmAndSend")).toBe("Confirm & Send");
+
+      // Missing everywhere — falls back to the key itself.
+      expect(translate("pt-BR", "totally.unknown")).toBe("totally.unknown");
+
+      // Plural keys work and fall back per form (#1460).
+      expect(translate("pt-BR", "contacts.count", { count: 3 })).toBe("3 contatos");
+      expect(translate("pt-BR", "walletHealth.signers", { count: 2 })).toBe("2 signers");
+    });
+  });
+});

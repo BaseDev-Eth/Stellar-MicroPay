@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Head from "next/head";
 import { useWallet } from "@/lib/useWallet";
+import { useTranslation } from "@/contexts/I18nContext";
 import WalletConnect from "@/components/WalletConnect";
 import { useTranslation } from "@/contexts/I18nContext";
 import { isValidStellarAddress, USDC_ISSUER } from "@/lib/stellar";
@@ -51,11 +52,11 @@ export default function ScheduledPaymentsPage() {
       const deployments = await listTurretsFunctions(publicKey);
       setPayments(deployments.filter(isScheduledPayment));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load scheduled payments");
+      setError(err instanceof Error ? err.message : t("scheduledPayments.failedToLoad"));
     } finally {
       setLoading(false);
     }
-  }, [publicKey]);
+  }, [publicKey, t]);
 
   useEffect(() => {
     void loadPayments();
@@ -66,13 +67,13 @@ export default function ScheduledPaymentsPage() {
     if (!publicKey) return;
 
     if (!isValidStellarAddress(recipient)) {
-      setError("Enter a valid Stellar recipient address");
+      setError(t("scheduledPayments.invalidRecipient"));
       return;
     }
 
     const amountNum = parseFloat(amount);
     if (!Number.isFinite(amountNum) || amountNum <= 0) {
-      setError("Enter a valid amount greater than zero");
+      setError(t("scheduledPayments.invalidAmount"));
       return;
     }
 
@@ -89,12 +90,12 @@ export default function ScheduledPaymentsPage() {
         assetIssuer: asset === "USDC" ? USDC_ISSUER : null,
         frequency,
       });
-      setSuccess("Scheduled payment created");
+      setSuccess(t("scheduledPayments.created"));
       setRecipient("");
       setAmount("");
       await loadPayments();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create scheduled payment");
+      setError(err instanceof Error ? err.message : t("scheduledPayments.failedToCreate"));
     } finally {
       setSubmitting(false);
     }
@@ -107,7 +108,7 @@ export default function ScheduledPaymentsPage() {
       await pauseTurretsFunction(id);
       await loadPayments();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to pause payment");
+      setError(err instanceof Error ? err.message : t("scheduledPayments.failedToPause"));
     } finally {
       setActionId(null);
     }
@@ -120,7 +121,7 @@ export default function ScheduledPaymentsPage() {
       await resumeTurretsFunction(id);
       await loadPayments();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to resume payment");
+      setError(err instanceof Error ? err.message : t("scheduledPayments.failedToResume"));
     } finally {
       setActionId(null);
     }
@@ -133,7 +134,7 @@ export default function ScheduledPaymentsPage() {
       await cancelTurretsFunction(id);
       await loadPayments();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to cancel payment");
+      setError(err instanceof Error ? err.message : t("scheduledPayments.failedToCancel"));
     } finally {
       setActionId(null);
     }
@@ -167,25 +168,25 @@ export default function ScheduledPaymentsPage() {
       <div className="mb-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="mb-2 font-display text-3xl font-bold text-white">Scheduled Payments</h1>
+            <h1 className="mb-2 font-display text-3xl font-bold text-white">{t("scheduledPayments.title")}</h1>
             <p className="text-slate-400">
-              Create recurring payments and manage active schedules (daily, weekly, or monthly).
+              {t("scheduledPayments.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-300">
             <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
-            <span>Durable Persistence & Recovery Active</span>
+            <span>{t("scheduledPayments.persistenceBadge")}</span>
           </div>
         </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
         <form onSubmit={handleCreate} className="card space-y-4">
-          <h2 className="font-display text-lg font-semibold text-white">Create recurring payment</h2>
+          <h2 className="font-display text-lg font-semibold text-white">{t("scheduledPayments.createTitle")}</h2>
 
           <div>
             <label className="label" htmlFor="recipient">
-              Recipient
+              {t("scheduledPayments.recipient")}
             </label>
             <input
               id="recipient"
@@ -199,7 +200,7 @@ export default function ScheduledPaymentsPage() {
 
           <div>
             <label className="label" htmlFor="amount">
-              Amount
+              {t("scheduledPayments.amount")}
             </label>
             <div className="flex gap-2">
               <input
@@ -216,7 +217,7 @@ export default function ScheduledPaymentsPage() {
                 value={asset}
                 onChange={(e) => setAsset(e.target.value as "XLM" | "USDC")}
                 className="input-field w-28"
-                aria-label="Asset"
+                aria-label={t("scheduledPayments.assetLabel")}
               >
                 <option value="XLM">XLM</option>
                 <option value="USDC">USDC</option>
@@ -226,7 +227,7 @@ export default function ScheduledPaymentsPage() {
 
           <div>
             <label className="label" htmlFor="frequency">
-              Frequency
+              {t("scheduledPayments.frequency")}
             </label>
             <select
               id="frequency"
@@ -234,9 +235,9 @@ export default function ScheduledPaymentsPage() {
               onChange={(e) => setFrequency(e.target.value as ScheduledFrequency)}
               className="input-field"
             >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
+              <option value="daily">{t("scheduledPayments.daily")}</option>
+              <option value="weekly">{t("scheduledPayments.weekly")}</option>
+              <option value="monthly">{t("scheduledPayments.monthly")}</option>
             </select>
           </div>
 
@@ -244,26 +245,26 @@ export default function ScheduledPaymentsPage() {
           {success && <p className="text-sm text-emerald-400">{success}</p>}
 
           <button type="submit" disabled={submitting} className="btn-primary w-full">
-            {submitting ? "Creating…" : "Create scheduled payment"}
+            {submitting ? t("scheduledPayments.creating") : t("scheduledPayments.createAction")}
           </button>
         </form>
 
         <div className="card">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-lg font-semibold text-white">Active schedules</h2>
+            <h2 className="font-display text-lg font-semibold text-white">{t("scheduledPayments.activeSchedules")}</h2>
             <button
               type="button"
               onClick={() => void loadPayments()}
               className="text-xs text-stellar-400 hover:text-stellar-300"
             >
-              Refresh
+              {t("scheduledPayments.refresh")}
             </button>
           </div>
 
           {loading ? (
-            <p className="text-sm text-slate-500">Loading…</p>
+            <p className="text-sm text-slate-500">{t("scheduledPayments.loading")}</p>
           ) : payments.length === 0 ? (
-            <p className="text-sm text-slate-500">No scheduled payments yet.</p>
+            <p className="text-sm text-slate-500">{t("scheduledPayments.empty")}</p>
           ) : (
             <div className="space-y-4">
               {payments.map((payment) => {
@@ -297,11 +298,11 @@ export default function ScheduledPaymentsPage() {
 
                     <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
                       <div>
-                        <p className="uppercase tracking-wide text-slate-500">Last execution</p>
+                        <p className="uppercase tracking-wide text-slate-500">{t("scheduledPayments.lastExecution")}</p>
                         <p className="text-slate-300">{payment.lastExecutedAt ? formatDate(payment.lastExecutedAt) : "—"}</p>
                       </div>
                       <div>
-                        <p className="uppercase tracking-wide text-slate-500">Next run</p>
+                        <p className="uppercase tracking-wide text-slate-500">{t("scheduledPayments.nextRun")}</p>
                         <p className="text-slate-300">{payment.nextRunAt ? formatDate(payment.nextRunAt) : "—"}</p>
                       </div>
                     </div>
@@ -314,7 +315,7 @@ export default function ScheduledPaymentsPage() {
                           onClick={() => void handlePause(payment.id)}
                           className="btn-secondary text-xs"
                         >
-                          Pause
+                          {t("scheduledPayments.pause")}
                         </button>
                       ) : (
                         <button
@@ -323,7 +324,7 @@ export default function ScheduledPaymentsPage() {
                           onClick={() => void handleResume(payment.id)}
                           className="btn-secondary text-xs"
                         >
-                          Resume
+                          {t("scheduledPayments.resume")}
                         </button>
                       )}
                       <button
@@ -332,7 +333,7 @@ export default function ScheduledPaymentsPage() {
                         onClick={() => void handleCancel(payment.id)}
                         className="rounded-lg border border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-300 hover:bg-red-500/10 disabled:opacity-50"
                       >
-                        Cancel
+                        {t("scheduledPayments.cancel")}
                       </button>
                     </div>
                   </div>

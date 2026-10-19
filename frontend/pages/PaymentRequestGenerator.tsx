@@ -3,10 +3,9 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import clsx from 'clsx';
 import { QRCodeCanvas } from 'qrcode.react';
-import { useTranslation } from '@/contexts/I18nContext';
+import { useTranslation } from "@/contexts/I18nContext";
 
 export default function PaymentRequestGenerator() {
-  const router = useRouter();
   const { t } = useTranslation();
   const [destination, setDestination] = useState('');
   const [amount, setAmount] = useState('');
@@ -74,12 +73,12 @@ export default function PaymentRequestGenerator() {
     <div className="card animate-fade-in border-stellar-400/20">
       <h2 className="font-display text-lg font-semibold text-white mb-6 flex items-center gap-2">
         <LinkIcon className="w-5 h-5 text-stellar-400" />
-        Request Payment
+        {t("paymentRequestGenerator.title")}
       </h2>
 
       <div className="space-y-4">
         <div>
-          <label className="label">Your Stellar Address</label>
+          <label className="label">{t("paymentRequestGenerator.addressLabel")}</label>
           <input
             type="text"
             className="input-field"
@@ -91,7 +90,7 @@ export default function PaymentRequestGenerator() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="label">Amount (XLM)</label>
+            <label className="label">{t("paymentRequestGenerator.amountLabel")}</label>
             <input
               type="number"
               className="input-field"
@@ -101,7 +100,7 @@ export default function PaymentRequestGenerator() {
             />
           </div>
           <div>
-            <label className="label">Memo (Optional)</label>
+            <label className="label">{t("paymentRequestGenerator.memoLabel")}</label>
             <input
               type="text"
               className="input-field"
@@ -114,15 +113,15 @@ export default function PaymentRequestGenerator() {
         </div>
 
         <div>
-          <label className="label">Link Expiry</label>
+          <label className="label">{t("paymentRequestGenerator.expiryLabel")}</label>
           <select
             value={expiry}
             onChange={(e) => setExpiry(e.target.value)}
             className="input-field bg-cosmos-950 border-stellar-400/20 text-slate-300"
           >
-            <option value="never">Never Expire</option>
-            <option value="24h">24 Hours</option>
-            <option value="7d">7 Days</option>
+            <option value="never">{t("paymentRequestGenerator.expiryNever")}</option>
+            <option value="24h">{t("paymentRequestGenerator.expiry24Hours")}</option>
+            <option value="7d">{t("paymentRequestGenerator.expiry7Days")}</option>
           </select>
         </div>
 
@@ -131,18 +130,18 @@ export default function PaymentRequestGenerator() {
           disabled={!destination || !amount}
           className="btn-primary w-full py-2.5"
         >
-          Create Request Link
+          {t("paymentRequestGenerator.createLink")}
         </button>
 
         {generatedLink && (
           <div className="mt-4 p-4 rounded-xl bg-stellar-400/5 border border-stellar-400/20 animate-slide-up">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-[10px] uppercase tracking-wider text-stellar-400 font-bold">Generated URL</p>
+              <p className="text-[10px] uppercase tracking-wider text-stellar-400 font-bold">{t("paymentRequestGenerator.generatedUrl")}</p>
               <button
                 onClick={() => setShowQR(!showQR)}
                 className="text-[10px] text-slate-400 hover:text-white underline"
               >
-                {showQR ? 'Hide QR' : 'Show QR'}
+                {showQR ? t('paymentRequestGenerator.hideQr') : t('paymentRequestGenerator.showQr')}
               </button>
             </div>
 
@@ -159,7 +158,7 @@ export default function PaymentRequestGenerator() {
                   copied ? "bg-emerald-500 text-white" : "bg-stellar-400 text-black hover:bg-stellar-300"
                 )}
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied ? t('paymentRequestGenerator.copied') : t('paymentRequestGenerator.copy')}
               </button>
             </div>
 
@@ -170,7 +169,7 @@ export default function PaymentRequestGenerator() {
                   onClick={downloadQR}
                   className="mt-3 text-[10px] bg-slate-100 hover:bg-slate-200 text-black px-3 py-1 rounded font-bold uppercase transition-colors"
                 >
-                  Download QR
+                  {t("paymentRequestGenerator.downloadQr")}
                 </button>
               </div>
             )}
