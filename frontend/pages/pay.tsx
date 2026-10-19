@@ -16,6 +16,7 @@ import {
   markPaymentLinkRedeemed,
 } from "@/lib/paymentLinks";
 import { useWallet } from "@/lib/useWallet";
+import { useTranslation } from "@/contexts/I18nContext";
 
 interface PrefillData {
   destination: string;
@@ -26,6 +27,7 @@ interface PrefillData {
 
 export default function PayPage() {
   const { publicKey } = useWallet();
+  const { t } = useTranslation();
   const router = useRouter();
   const { t } = useTranslation();
   const { data } = router.query;
@@ -44,13 +46,13 @@ export default function PayPage() {
 
         // Validation: Check for Expiration
         if (parsedData.validUntil && Date.now() > parsedData.validUntil) {
-          setError("This payment link has expired.");
+          setError(t("pay.linkExpired"));
           return;
         }
 
         // Validation: Check for Required Fields
         if (!parsedData.destination || !parsedData.amount) {
-          setError("The payment link data is incomplete or malformed.");
+          setError(t("pay.linkIncomplete"));
           return;
         }
 
@@ -60,8 +62,8 @@ export default function PayPage() {
         if (!redeemable.ok) {
           setError(
             redeemable.reason === "redeemed"
-              ? "This payment link has already been redeemed."
-              : "This payment link has expired."
+              ? t("pay.linkRedeemed")
+              : t("pay.linkExpired")
           );
           return;
         }
@@ -70,10 +72,10 @@ export default function PayPage() {
         setError(null); // Clear errors if valid
       } catch (err) {
         console.error("Invalid payment link data", err);
-        setError("Invalid payment link. Please check the URL.");
+        setError(t("pay.linkInvalid"));
       }
     }
-  }, [data]);
+  }, [data, t]);
 
   // Step 2: Fetch balance if wallet is connected
   useEffect(() => {
@@ -104,13 +106,13 @@ export default function PayPage() {
         <div className="bg-red-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
           <span className="text-2xl text-red-500">⚠️</span>
         </div>
-        <h2 className="text-xl font-bold text-white mb-2">Payment Unavailable</h2>
+        <h2 className="text-xl font-bold text-white mb-2">{t("pay.unavailableTitle")}</h2>
         <p className="text-slate-400 mb-6">{error}</p>
         <button
           onClick={() => router.push('/dashboard')}
           className="btn-secondary w-full py-2"
         >
-          Return to Dashboard
+          {t("pay.returnToDashboard")}
         </button>
         </div>
       </>
@@ -125,18 +127,18 @@ export default function PayPage() {
       <div className="max-w-2xl mx-auto px-4 py-16 animate-fade-in">
       <div className="text-center mb-10">
         <h1 className="font-display text-3xl font-bold text-white mb-3">
-          Complete Payment
+          {t("pay.title")}
         </h1>
         <p className="text-slate-400">
           {publicKey
-            ? "Review the details below to authorize the transaction."
-            : "You’ve received a payment request. Connect your wallet to proceed."}
+            ? t("pay.subtitleConnected")
+            : t("pay.subtitleConnectPrompt")}
         </p>
 
         {tipTotal !== null && CONTRACT_ID && (
           <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stellar-500/10 border border-stellar-500/20">
             <span className="text-xs font-medium text-stellar-400">
-              {`Recipient's Total Tips Recorded:`}
+              {t("pay.recipientTotalTips")}
             </span>
             <span className="text-xs font-bold text-white">
               {formatStroopsToXLM(tipTotal)}

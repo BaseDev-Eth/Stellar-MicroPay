@@ -5,6 +5,7 @@
 
 import { useState, useRef } from "react";
 import { QRCodeSVG, QRCodeCanvas } from "qrcode.react";
+import { useTranslation } from "@/contexts/I18nContext";
 
 interface QRCodeModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface QRCodeModalProps {
 }
 
 export default function QRCodeModal({ isOpen, onClose, publicKey, amount }: QRCodeModalProps) {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Generate SEP-0007 URI format: web+stellar:pay?destination=G...[&amount=X]
@@ -53,7 +55,7 @@ export default function QRCodeModal({ isOpen, onClose, publicKey, amount }: QRCo
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-display text-xl font-semibold text-white">
-            Receive Payment QR Code
+            {t("qrCode.title")}
           </h3>
           <button
             onClick={onClose}
@@ -77,7 +79,7 @@ export default function QRCodeModal({ isOpen, onClose, publicKey, amount }: QRCo
 
           {/* Address Display */}
           <div className="text-center mb-4">
-            <p className="text-xs text-slate-400 mb-1">Your Stellar Address</p>
+            <p className="text-xs text-slate-400 mb-1">{t("qrCode.yourAddress")}</p>
             <p className="font-mono text-sm text-slate-300 break-all">
               {publicKey}
             </p>
@@ -85,7 +87,7 @@ export default function QRCodeModal({ isOpen, onClose, publicKey, amount }: QRCo
 
           {/* URI Display */}
           <div className="text-center mb-6">
-            <p className="text-xs text-slate-400 mb-1">Payment URI</p>
+            <p className="text-xs text-slate-400 mb-1">{t("qrCode.paymentUri")}</p>
             <p className="font-mono text-xs text-slate-400 break-all max-w-full">
               {stellarURI}
             </p>
@@ -96,24 +98,24 @@ export default function QRCodeModal({ isOpen, onClose, publicKey, amount }: QRCo
         <div className="flex gap-3">
           <button
             onClick={downloadQRCode}
-            aria-label="Download QR code as PNG"
+            aria-label={t("qrCode.downloadAria")}
             className="flex-1 bg-stellar-500 hover:bg-stellar-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <DownloadIcon className="w-4 h-4" />
-            Download PNG
+            {t("qrCode.download")}
           </button>
           <button
             onClick={onClose}
             className="flex-1 bg-white/10 hover:bg-white/20 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
           >
-            Close
+            {t("common.close")}
           </button>
         </div>
 
         {/* Instructions */}
         <div className="mt-4 pt-4 border-t border-white/5">
           <p className="text-xs text-slate-400 text-center">
-            Scan this QR code with Freighter mobile or any Stellar wallet to receive payments.
+            {t("qrCode.instructions")}
           </p>
         </div>
       </div>

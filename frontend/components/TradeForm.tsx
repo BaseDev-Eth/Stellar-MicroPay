@@ -12,6 +12,7 @@ import {
   submitTransaction,
   getNetworkPassphrase,
 } from "@/lib/stellar";
+import { useTranslation } from "@/contexts/I18nContext";
 
 interface TradeFormProps {
   publicKey: string;
@@ -21,6 +22,7 @@ interface TradeFormProps {
 }
 
 export default function TradeForm({ publicKey, onTradeComplete, onError, onSuccess }: TradeFormProps) {
+  const { t } = useTranslation();
   const [orderType, setOrderType] = useState<"market" | "limit">("market");
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [sellingAsset, setSellingAsset] = useState<"XLM" | "USDC">("XLM");
@@ -39,12 +41,12 @@ export default function TradeForm({ publicKey, onTradeComplete, onError, onSucce
     e.preventDefault();
 
     if (!amount || (orderType === "limit" && !price)) {
-      onError("Please fill in all required fields");
+      onError(t("tradeForm.fillRequiredFields"));
       return;
     }
 
     if (sellingAsset === buyingAsset) {
-      onError("Cannot trade the same asset");
+      onError(t("tradeForm.sameAssetError"));
       return;
     }
 
@@ -99,8 +101,10 @@ export default function TradeForm({ publicKey, onTradeComplete, onError, onSucce
 
       onSuccess(
         orderType === "market"
-          ? "Market order executed successfully!"
-          : `${side === "sell" ? "Sell" : "Buy"} order placed successfully!`
+          ? t("tradeForm.marketOrderSuccess")
+          : side === "sell"
+            ? t("tradeForm.sellOrderSuccess")
+            : t("tradeForm.buyOrderSuccess")
       );
 
       onTradeComplete();
@@ -111,7 +115,7 @@ export default function TradeForm({ publicKey, onTradeComplete, onError, onSucce
 
     } catch (error) {
       console.error("Trade failed:", error);
-      onError(error instanceof Error ? error.message : "Trade failed");
+      onError(error instanceof Error ? error.message : t("tradeForm.tradeFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +141,7 @@ export default function TradeForm({ publicKey, onTradeComplete, onError, onSucce
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            Market Order
+            {t("tradeForm.marketOrderType")}
           </button>
           <button
             type="button"
@@ -148,7 +152,7 @@ export default function TradeForm({ publicKey, onTradeComplete, onError, onSucce
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            Limit Order
+            {t("tradeForm.limitOrderType")}
           </button>
         </div>
 
@@ -156,7 +160,7 @@ export default function TradeForm({ publicKey, onTradeComplete, onError, onSucce
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              You Pay
+              {t("tradeForm.youPay")}
             </label>
             <div className="flex gap-2">
               <select
@@ -194,7 +198,7 @@ export default function TradeForm({ publicKey, onTradeComplete, onError, onSucce
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              You Receive
+              {t("tradeForm.youReceive")}
             </label>
             <div className="flex gap-2">
               <select
@@ -212,12 +216,12 @@ export default function TradeForm({ publicKey, onTradeComplete, onError, onSucce
                   min="0"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  placeholder="Price"
+                  placeholder={t("tradeForm.pricePlaceholder")}
                   className="flex-1 px-3 py-2 bg-cosmos-800 border border-stellar-500/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-stellar-400"
                 />
               ) : (
                 <div className="flex-1 px-3 py-2 bg-cosmos-800 border border-stellar-500/20 rounded-lg text-slate-500">
-                  Market Price
+                  {t("tradeForm.marketPrice")}
                 </div>
               )}
             </div>
@@ -237,7 +241,7 @@ export default function TradeForm({ publicKey, onTradeComplete, onError, onSucce
                     : "text-slate-400 hover:text-white"
                 }`}
               >
-                Buy Order
+                {t("tradeForm.buyOrderSide")}
               </button>
               <button
                 type="button"
@@ -248,7 +252,7 @@ export default function TradeForm({ publicKey, onTradeComplete, onError, onSucce
                     : "text-slate-400 hover:text-white"
                 }`}
               >
-                Sell Order
+                {t("tradeForm.sellOrderSide")}
               </button>
             </div>
           </div>
@@ -260,7 +264,13 @@ export default function TradeForm({ publicKey, onTradeComplete, onError, onSucce
           disabled={isLoading || !amount || (orderType === "limit" && !price)}
           className="w-full btn-primary"
         >
-          {isLoading ? "Processing..." : orderType === "market" ? "Execute Market Order" : `${side === "buy" ? "Place Buy" : "Place Sell"} Order`}
+          {isLoading
+            ? t("tradeForm.processing")
+            : orderType === "market"
+              ? t("tradeForm.executeMarketOrder")
+              : side === "buy"
+                ? t("tradeForm.placeBuyOrder")
+                : t("tradeForm.placeSellOrder")}
         </button>
       </form>
     </div>

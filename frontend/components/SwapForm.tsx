@@ -19,6 +19,7 @@ import {
   formatNumber,
   formatPercent,
 } from "@/utils/intlFormatters";
+import { useTranslation } from "@/contexts/I18nContext";
 
 const DEFAULT_SLIPPAGE_BPS = 50; // 0.50%
 const SLIPPAGE_OPTIONS = [25, 50, 100, 200]; // basis points
@@ -47,6 +48,7 @@ export default function SwapForm({
   onError,
   onSuccess,
 }: SwapFormProps) {
+  const { t } = useTranslation();
   const [sellAsset, setSellAsset] = useState<"XLM" | "USDC">("XLM");
   const [buyAsset, setBuyAsset] = useState<"XLM" | "USDC">("USDC");
   const [sellAmount, setSellAmount] = useState("");
@@ -86,7 +88,7 @@ export default function SwapForm({
 
       if (!nextQuote) {
         setQuote(null);
-        setQuoteError("No DEX path found for this swap");
+        setQuoteError(t("swap.noPathFound"));
         return;
       }
 
@@ -94,13 +96,15 @@ export default function SwapForm({
     } catch (err) {
       if (requestId !== quoteRequestId.current) return;
       setQuote(null);
-      setQuoteError(err instanceof Error ? err.message : "Failed to fetch swap quote");
+      setQuoteError(
+        err instanceof Error ? err.message : t("swap.quoteFetchFailed")
+      );
     } finally {
       if (requestId === quoteRequestId.current) {
         setIsQuoting(false);
       }
     }
-  }, [buyAsset, sellAmount, sellAsset]);
+  }, [buyAsset, sellAmount, sellAsset, t]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -136,7 +140,7 @@ export default function SwapForm({
 
       const { signedXDR, error: signError } = await signTransactionWithWallet(transaction.toXDR());
       if (signError || !signedXDR) {
-        throw new Error(signError || "Signing cancelled");
+        throw new Error(signError || t("swap.signingCancelled"));
       }
 
       const result = await submitTransaction(signedXDR);
@@ -144,13 +148,15 @@ export default function SwapForm({
       const receivedDisplay = received ?? quote.destinationAmount;
 
       onSuccess(
-        `Swap successful! Received ${formatAsset(receivedDisplay, buyAsset)}`
+        t("swap.successMessage", {
+          received: formatAsset(receivedDisplay, buyAsset),
+        })
       );
       onSwapComplete();
       setSellAmount("");
       setQuote(null);
     } catch (err) {
-      onError(err instanceof Error ? err.message : "Swap failed");
+      onError(err instanceof Error ? err.message : t("swap.swapFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -158,11 +164,11 @@ export default function SwapForm({
 
   return (
     <div className="card">
-      <h2 className="mb-4 font-display text-xl font-semibold text-white">Swap XLM ↔ USDC</h2>
+      <h2 className="mb-4 font-display text-xl font-semibold text-white">{t("swap.title")}</h2>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="label" htmlFor="sell-amount">
-            Sell
+            {t("swap.sell")}
           </label>
           <div className="flex gap-2">
             <select
@@ -173,7 +179,7 @@ export default function SwapForm({
                 if (next === buyAsset) setBuyAsset(next === "XLM" ? "USDC" : "XLM");
               }}
               className="input-field w-28"
-              aria-label="Sell asset"
+              aria-label={t("swap.sellAssetLabel")}
             >
               <option value="XLM">XLM</option>
               <option value="USDC">USDC</option>
@@ -196,7 +202,7 @@ export default function SwapForm({
             type="button"
             onClick={flipAssets}
             className="rounded-lg bg-stellar-500/20 p-2 transition-colors hover:bg-stellar-500/30"
-            aria-label="Flip assets"
+            aria-label={t("swap.flipAssets")}
           >
             <svg className="h-5 w-5 text-stellar-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -211,7 +217,7 @@ export default function SwapForm({
 
         <div>
           <label className="label" htmlFor="buy-estimate">
-            Estimated buy
+            {t("swap.estimatedBuy")}
           </label>
           <div className="flex gap-2">
             <select
@@ -222,7 +228,7 @@ export default function SwapForm({
                 if (next === sellAsset) setSellAsset(next === "XLM" ? "USDC" : "XLM");
               }}
               className="input-field w-28"
-              aria-label="Buy asset"
+              aria-label={t("swap.buyAssetLabel")}
             >
               <option value="XLM">XLM</option>
               <option value="USDC">USDC</option>
@@ -233,7 +239,7 @@ export default function SwapForm({
               readOnly
               value={
                 isQuoting
-                  ? "Fetching path…"
+                  ? t("swap.fetchingPath")
                   : quote
                     ? formatNumber(quote.destinationAmount, buyAsset)
                     : ""
@@ -245,7 +251,7 @@ export default function SwapForm({
         </div>
 
         <div>
-          <label className="label">Slippage tolerance</label>
+          <label className="label">{t("swap.slippageTolerance")}</label>
           <div className="flex flex-wrap gap-2">
             {SLIPPAGE_OPTIONS.map((bps) => (
               <button
@@ -267,19 +273,25 @@ export default function SwapForm({
         {quote && (
           <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-400">Exchange rate</span>
+              <span className="text-slate-400">{t("swap.exchangeRate")}</span>
               <span className="text-white">
                 1 {sellAsset} ≈ {formatNumber(quote.exchangeRate, buyAsset)} {buyAsset}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Min received ({formatPercent(slippageBps / 100, { maximumFractionDigits: 2 })} slip)</span>
+              <span className="text-slate-400">
+                {t("swap.minReceived", {
+                  percent: formatPercent(slippageBps / 100, {
+                    maximumFractionDigits: 2,
+                  }),
+                })}
+              </span>
               <span className="text-white">
                 {destMin ? formatAsset(destMin, buyAsset) : "—"}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Path hops</span>
+              <span className="text-slate-400">{t("swap.pathHops")}</span>
               <span className="text-white">{formatNumber(quote.path.length, "XLM", { maximumFractionDigits: 0 })}</span>
             </div>
           </div>
@@ -288,7 +300,9 @@ export default function SwapForm({
         {quoteError && <p className="text-sm text-red-400">{quoteError}</p>}
 
         <button type="submit" disabled={!canSubmit} className="btn-primary w-full">
-          {isSubmitting ? "Swapping…" : `Swap ${sellAsset} → ${buyAsset}`}
+          {isSubmitting
+            ? t("swap.swapping")
+            : t("swap.action", { from: sellAsset, to: buyAsset })}
         </button>
       </form>
     </div>

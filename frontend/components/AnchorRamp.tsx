@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import { useWallet } from "@/lib/useWallet";
+import { useTranslation } from "@/contexts/I18nContext";
 import { getJwtToken } from "@/lib/auth";
 import {
   DEFAULT_ANCHOR_URL,
@@ -17,6 +18,7 @@ import {
 } from "@/lib/anchor";
 
 export default function AnchorRamp() {
+  const { t } = useTranslation();
   const { publicKey } = useWallet();
   const [anchorUrl, setAnchorUrlState] = useState(getAnchorUrl);
   const [asset, setAsset] = useState("USDC");
@@ -38,9 +40,9 @@ export default function AnchorRamp() {
     try {
       const result = await fetchAnchorInfo(anchorUrl || DEFAULT_ANCHOR_URL);
       setInfo(result);
-      setNotice("Anchor info loaded. Choose deposit or withdraw below.");
+      setNotice(t("anchorRamp.infoLoaded"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not reach the anchor server.");
+      setError(err instanceof Error ? err.message : t("anchorRamp.reachFailed"));
     } finally {
       setLoading(false);
     }
@@ -48,7 +50,7 @@ export default function AnchorRamp() {
 
   const handleDeposit = () => {
     if (!publicKey) {
-      setError("Connect your wallet first.");
+      setError(t("anchorRamp.connectFirst"));
       return;
     }
     const url = buildDepositUrl({
@@ -57,23 +59,23 @@ export default function AnchorRamp() {
       account: publicKey,
     });
     window.open(url, "_blank", "noopener,noreferrer");
-    setNotice("Anchor deposit flow opened in a new tab. Complete KYC/payment there.");
+    setNotice(t("anchorRamp.depositOpened"));
   };
 
   const handleWithdraw = async () => {
     setError(null);
     setNotice(null);
     if (!publicKey) {
-      setError("Connect your wallet first.");
+      setError(t("anchorRamp.connectFirst"));
       return;
     }
     if (!amount || Number(amount) <= 0) {
-      setError("Enter a valid amount to withdraw.");
+      setError(t("anchorRamp.invalidAmount"));
       return;
     }
     const token = getJwtToken();
     if (!token) {
-      setError("Sign in (SEP-0010) to get a JWT before withdrawing.");
+      setError(t("anchorRamp.signInRequired"));
       return;
     }
     setLoading(true);
@@ -85,11 +87,9 @@ export default function AnchorRamp() {
         account: publicKey,
         jwt: token,
       });
-      setNotice(
-        "Withdraw submitted. Await the Stellar payment from the anchor, then check your balance."
-      );
+      setNotice(t("anchorRamp.withdrawSubmitted"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Withdraw failed.");
+      setError(err instanceof Error ? err.message : t("anchorRamp.withdrawFailed"));
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,7 @@ export default function AnchorRamp() {
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-          Anchor server URL
+          {t("anchorRamp.serverUrlLabel")}
         </label>
         <input
           type="url"
@@ -109,13 +109,13 @@ export default function AnchorRamp() {
           className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-cosmos-900 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-stellar-500 focus:border-transparent"
         />
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Default: {DEFAULT_ANCHOR_URL} (public testnet anchor). Stored locally.
+          {t("anchorRamp.defaultHint", { url: DEFAULT_ANCHOR_URL })}
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <label className="block text-sm text-slate-700 dark:text-slate-300">
-          Asset
+          {t("anchorRamp.assetLabel")}
           <select
             value={asset}
             onChange={(e) => setAsset(e.target.value)}
@@ -126,7 +126,7 @@ export default function AnchorRamp() {
           </select>
         </label>
         <label className="block text-sm text-slate-700 dark:text-slate-300">
-          Amount (withdraw)
+          {t("anchorRamp.amountLabel")}
           <input
             type="number"
             min={0}
@@ -146,14 +146,14 @@ export default function AnchorRamp() {
           disabled={loading}
           className="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-60"
         >
-          {loading ? "Loading…" : "Fetch anchor info"}
+          {loading ? t("common.loading") : t("anchorRamp.fetchInfo")}
         </button>
         <button
           type="button"
           onClick={handleDeposit}
           className="px-4 py-2 bg-stellar-500 hover:bg-stellar-600 text-white rounded-lg text-sm font-medium transition-colors"
         >
-          Deposit →
+          {t("anchorRamp.deposit")}
         </button>
         <button
           type="button"
@@ -161,13 +161,13 @@ export default function AnchorRamp() {
           disabled={loading}
           className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-60"
         >
-          Withdraw
+          {t("anchorRamp.withdraw")}
         </button>
       </div>
 
       {info && (
         <details className="text-xs text-slate-500 dark:text-slate-400">
-          <summary className="cursor-pointer text-stellar-400">Anchor info (SEP-0006)</summary>
+          <summary className="cursor-pointer text-stellar-400">{t("anchorRamp.infoSummary")}</summary>
           <pre className="mt-2 p-3 rounded-lg bg-black/30 overflow-auto max-h-48">
             {JSON.stringify(info, null, 2)}
           </pre>
